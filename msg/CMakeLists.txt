@@ -101,6 +101,7 @@ set(msg_files
 	satellite_info.msg
 	sensor_accel.msg
 	sensor_baro.msg
+        attack_status.msg
 	sensor_bias.msg
 	sensor_combined.msg
 	sensor_correction.msg

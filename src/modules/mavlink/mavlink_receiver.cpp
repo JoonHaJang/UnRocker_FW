@@ -2069,6 +2069,18 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
 		_baro_pub.publish(baro);
 	}
 
+        //jsjeong
+        {
+		attack_status_s attack{};
+
+		attack.timestamp = timestamp;
+		//attack.attack_trigger = _parameters.attack_trigger;
+		//attack.attack_frequency = _parameters.attack_frequency;
+        	//attack.attack_amplitude = _parameters.attack_apmlitude;
+
+		_attack_pub.publish(attack);
+	}
+
 	/* battery status */
 	{
 		battery_status_s hil_battery_status{};

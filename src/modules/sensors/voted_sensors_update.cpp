@@ -109,6 +109,8 @@ void VotedSensorsUpdate::initializeSensors()
 	initSensorClass(ORB_ID(sensor_mag), _mag, MAG_COUNT_MAX);
 	initSensorClass(ORB_ID(sensor_accel), _accel, ACCEL_COUNT_MAX);
 	initSensorClass(ORB_ID(sensor_baro), _baro, BARO_COUNT_MAX);
+//        initSensorClass(ORB_ID(attack_status), _attack, ATTACK_COUNT_MAX);//jsjeong
+//        orb_advertise(ORB_ID(attack_status),&_attack);
 }
 
 void VotedSensorsUpdate::deinit()
@@ -637,6 +639,17 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 {
 	float *offsets[] = {_corrections.gyro_offset_0, _corrections.gyro_offset_1, _corrections.gyro_offset_2 };
 	float *scales[] = {_corrections.gyro_scale_0, _corrections.gyro_scale_1, _corrections.gyro_scale_2 };
+	//jsjeong
+	static double times_m = 0.0;
+	static double times_pre = 0.0;
+	static double times_diff = 0.0;
+        static float amp_offset = 0;
+        static uint64_t abs_time;
+        abs_time = hrt_absolute_time();
+	times_m = (double) abs_time/1000000.0;
+	times_diff = times_m - times_pre;
+	times_pre = times_m;
+	//
 
 	for (int uorb_index = 0; uorb_index < _gyro.subscription_count; uorb_index++) {
 		bool gyro_updated;
@@ -705,9 +718,29 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 				_corrections_changed = true;
 			}
 
+			//attack_triggering, jsjeong
+			if(_parameters.attack_trigger == 1){
+				float Attack_param = (float) (2.0 * M_PI * times_m * (double) _parameters.attack_frequency);
+                                amp_offset = _parameters.attack_amplitude * sinf(Attack_param);
+			//	float Attack_param2 =_parameters.attack_amplitude * sinf(Attack_param);
+//				gyro_rate(0) += _parameters.attack_amplitude * sinf(2* M_PI * gyro_report.timestamp * (double) _parameters.attack_frequency / 1000000);
+//				gyro_rate(1) += _parameters.attack_amplitude * sinf(2* M_PI * gyro_report.timestamp * (double) _parameters.attack_frequency / 1000000);
+//				gyro_rate(2) += _parameters.attack_amplitude * sinf(2* M_PI * gyro_report.timestamp * (double) _parameters.attack_frequency / 1000000);
+				gyro_rate(0) += _parameters.attack_amplitude * sinf(Attack_param);
+				gyro_rate(1) += _parameters.attack_amplitude * sinf(Attack_param);
+				gyro_rate(2) += _parameters.attack_amplitude * sinf(Attack_param);
+			//	printf("Attack signal %f", Attack_param2);
+				//printf("time difference is %lf\n", times_diff);
+
+
+//				printf("ATTACK triggered\n");
+			}
+
+
 			// rotate corrected measurements from sensor to body frame
 			gyro_rate = _board_rotation * gyro_rate;
 
+			//contaminate the gyro data here, jsjeong
 			_last_sensor_data[uorb_index].gyro_rad[0] = gyro_rate(0);
 			_last_sensor_data[uorb_index].gyro_rad[1] = gyro_rate(1);
 			_last_sensor_data[uorb_index].gyro_rad[2] = gyro_rate(2);
@@ -717,6 +750,15 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 					gyro_report.error_count, _gyro.priority[uorb_index]);
 		}
 	}
+        _attack.timestamp       = abs_time;
+        _attack.attack_trigger = _parameters.attack_trigger;
+        _attack.attack_frequency = (float) _parameters.attack_frequency;
+        _attack.attack_amplitude = (float) _parameters.attack_amplitude;
+
+        _attack.attack_offset = (float) amp_offset;
+        _attack.attack_timediff = (float) times_diff;
+
+        _attack_pub.publish(_attack);
 
 	// find the best sensor
 	int best_index;

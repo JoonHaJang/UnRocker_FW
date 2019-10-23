@@ -322,4 +322,7 @@ rtps:
   - msg: vehicle_angular_velocity_groundtruth
     id: 168
     alias: vehicle_angular_velocity
+  - msg: attack_status
+    id: 168
+    send: true
   ########## multi topics: end ##########

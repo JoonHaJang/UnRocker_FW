@@ -70,6 +70,11 @@ struct Parameters {
 
 	int32_t board_rotation;
 
+	//jsjeong
+	int32_t attack_trigger;
+	float 	attack_frequency;
+	float 	attack_amplitude;
+
 	float board_offset[3];
 
 	int32_t rc_map_roll;
@@ -229,6 +234,12 @@ struct ParameterHandles {
 	param_t battery_adc_channel;
 
 	param_t board_rotation;
+
+	//jsjeong
+	param_t attack_trigger;
+	param_t attack_frequency;
+	param_t attack_amplitude;
+
 
 	param_t board_offset[3];
 

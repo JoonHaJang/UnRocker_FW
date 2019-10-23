@@ -55,6 +55,7 @@
 #include <uORB/topics/estimator_status.h>
 #include <uORB/topics/sensor_accel.h>
 #include <uORB/topics/sensor_baro.h>
+#include <uORB/topics/attack_status.h>//jsjeong
 #include <uORB/topics/sensor_gyro.h>
 #include <uORB/topics/sensor_mag.h>
 #include <uORB/topics/sensor_preflight.h>
@@ -344,6 +345,38 @@ static bool gyroCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, u
 	return calibration_valid && gyro_valid;
 }
 
+//jsjeong
+/*static bool attackCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, uint8_t instance, bool optional,
+		      int32_t &device_id, bool report_fail)
+{
+	const bool exists = (orb_exists(ORB_ID(attack_status), instance) == PX4_OK);
+	bool attack_valid = false;
+
+	if (exists) {
+		uORB::SubscriptionData<attack_status_s> attack{ORB_ID(attack_status), instance};
+
+		attack_valid = (hrt_elapsed_time(&attack.get().timestamp) < 1_s);
+
+		if (!attack_valid) {
+			if (report_fail) {
+				mavlink_log_critical(mavlink_log_pub, "Preflight Fail: no valid data from Attack #%u", instance);
+			}
+		}
+
+
+	} else {
+		if (!optional && report_fail) {
+			mavlink_log_critical(mavlink_log_pub, "Preflight Fail: Attack Sensor #%u missing", instance);
+		}
+	}
+
+	if (instance == 0) {
+		set_health_flags(subsystem_info_s::SUBSYSTEM_TYPE_ABSPRESSURE, exists, !optional, attack_valid, status);
+	}
+
+	return attack_valid;
+}
+*/
 static bool baroCheck(orb_advert_t *mavlink_log_pub, vehicle_status_s &status, uint8_t instance, bool optional,
 		      int32_t &device_id, bool report_fail)
 {

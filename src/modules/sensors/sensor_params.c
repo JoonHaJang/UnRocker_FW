@@ -178,6 +178,30 @@ PARAM_DEFINE_INT32(SENS_BOARD_ROT, 0);
  * @unit deg
  * @group Sensors
  */
+
+
+PARAM_DEFINE_INT32(ATTACK_TRIGGER, 0);
+
+/**
+ * jsjeong, attack_trigger
+ * default 0
+ */
+
+PARAM_DEFINE_FLOAT(ATTACK_FREQ, 0.0f);
+
+/**
+ * jsjeong, attack_frequency
+ * default 0.0f
+ */
+
+PARAM_DEFINE_FLOAT(ATTACK_AMP, 0.0f);
+
+/**
+ * jsjeong, attack_amplitude
+ * default 0.0f
+ */
+
+
 PARAM_DEFINE_FLOAT(SENS_BOARD_Y_OFF, 0.0f);
 
 /**

@@ -272,6 +272,11 @@ Sensors::~Sensors()
 int
 Sensors::parameters_update()
 {
+	//jsjeong
+	param_get(_parameter_handles.attack_trigger, &(_parameters.attack_trigger));
+	param_get(_parameter_handles.attack_frequency, &(_parameters.attack_frequency));
+	param_get(_parameter_handles.attack_amplitude, &(_parameters.attack_amplitude));
+
 	if (_armed) {
 		return 0;
 	}
