@@ -262,10 +262,12 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 	if (_mavlink->get_hil_enabled()) {
 		switch (msg->msgid) {
 		case MAVLINK_MSG_ID_HIL_SENSOR:
+//			printf("HIL_SENSOR\n");
 			handle_message_hil_sensor(msg);
 			break;
 
 		case MAVLINK_MSG_ID_HIL_STATE_QUATERNION:
+//			printf("HIL_STATE\n");
 			handle_message_hil_state_quaternion(msg);
 			break;
 
@@ -1989,9 +1991,98 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
 {
 	mavlink_hil_sensor_t imu;
 	mavlink_msg_hil_sensor_decode(msg, &imu);
-
 	const uint64_t timestamp = hrt_absolute_time();
 
+	//jsjeong
+/*	static double times_m = 0.0;
+	static double times_pre = 0.0;
+	static double times_diff = 0.0;
+        static float amp_offset = 0;
+        static uint64_t abs_time;
+        abs_time = timestamp;//hrt_absolute_time();//+(rand()%2)*20;
+	times_m = (double) abs_time/1000000.0;
+	times_diff = times_m - times_pre;
+	times_pre = times_m;
+	//
+
+	attack_status_s _attack_status{};
+
+	amp_offset = _param_sim_attack_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_sim_attack_frq.get()));
+
+	if (_param_sim_attack_trg.get() != 0)
+	{
+		imu.xgyro += amp_offset;
+		imu.ygyro += amp_offset;
+		imu.zgyro += amp_offset;
+		_attack_status.attack_gyro0 = imu.xgyro;
+                _attack_status.attack_gyro1 = imu.ygyro;
+                _attack_status.attack_gyro2 = imu.zgyro;
+        }
+        else if(_param_sim_attack_log.get() != 0)//
+        {
+		_attack_status.attack_gyro0 = imu.xgyro+amp_offset;
+                _attack_status.attack_gyro1 = imu.ygyro+amp_offset;
+                _attack_status.attack_gyro2 = imu.zgyro+amp_offset;
+
+         }
+         else //log raw data
+         {
+		_attack_status.attack_gyro0 = imu.xgyro;
+                _attack_status.attack_gyro1 = imu.ygyro;
+                _attack_status.attack_gyro2 = imu.zgyro;
+          }
+
+	_attack_status.timestamp       = abs_time;
+       	_attack_status.attack_trigger = _param_sim_attack_trg.get();
+        _attack_status.attack_frequency = (float) _param_sim_attack_frq.get();
+       	_attack_status.attack_amplitude = (float) _param_sim_attack_amp.get();
+        _attack_status.attack_log_trigger = _param_sim_attack_log.get();
+
+       	_attack_status.attack_offset = (float) amp_offset;
+        _attack_status.attack_timediff = (float) times_diff;
+
+	_attack_pub.publish(_attack_status);
+
+	static float amp_offset_a = 0;
+	
+	amp_offset_a = _param_sim_attacc_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_sim_attacc_frq.get()));
+	attacc_status_s _attacc_status{};
+
+	if (_param_sim_attacc_trg.get() != 0)
+	{
+		imu.xacc += amp_offset_a;
+		imu.yacc += amp_offset_a;
+		imu.zacc += amp_offset_a;
+
+		_attacc_status.attacc_accel0 = imu.xacc;
+                _attacc_status.attacc_accel1 = imu.yacc;
+                _attacc_status.attacc_accel2 = imu.zacc;
+
+        }
+        else if(_param_sim_attacc_log.get() != 0)//
+        {
+		_attacc_status.attacc_accel0 = imu.xacc+amp_offset_a;
+                _attacc_status.attacc_accel1 = imu.yacc+amp_offset_a;
+                _attacc_status.attacc_accel2 = imu.zacc+amp_offset_a;
+
+        }
+        else //log raw data
+        {
+		_attacc_status.attacc_accel0 = imu.xacc;
+                _attacc_status.attacc_accel1 = imu.yacc;
+                _attacc_status.attacc_accel2 = imu.zacc;
+        }
+
+	_attacc_status.timestamp       = abs_time;
+	_attacc_status.attacc_trigger = _param_sim_attacc_trg.get();
+	_attacc_status.attacc_frequency = (float) _param_sim_attacc_frq.get();
+        _attacc_status.attacc_amplitude = (float) _param_sim_attacc_amp.get();
+	_attacc_status.attacc_log_trigger = _param_sim_attacc_log.get();
+
+       	_attacc_status.attacc_offset = (float) amp_offset_a;
+        _attacc_status.attacc_timediff = (float) times_diff;
+	_attacc_pub.publish(_attacc_status);
+*/
 	/* airspeed */
 	{
 		airspeed_s airspeed{};
@@ -2011,14 +2102,24 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
 	/* gyro */
 	{
 		sensor_gyro_s gyro{};
+		// Filtered values
+		const matrix::Vector3f val_filtered_gyro_LPF{_filter_gyro.apply({imu.xgyro, imu.ygyro, imu.zgyro})};
+
+		val_filtered_gyro(0) =  val_filtered_gyro(0) * (1.0f - conf(0)) + imu.xgyro*conf(0);
+		val_filtered_gyro(1) =  val_filtered_gyro(1) * (1.0f - conf(1)) + imu.ygyro*conf(1);
+		val_filtered_gyro(2) =  val_filtered_gyro(2) * (1.0f - conf(2)) + imu.zgyro*conf(2);
 
 		gyro.timestamp = timestamp;
 		gyro.x_raw = imu.xgyro * 1000.0f;
 		gyro.y_raw = imu.ygyro * 1000.0f;
 		gyro.z_raw = imu.zgyro * 1000.0f;
-		gyro.x = imu.xgyro;
-		gyro.y = imu.ygyro;
-		gyro.z = imu.zgyro;
+		gyro.x = val_filtered_gyro_LPF(0);//imu.xgyro;
+		gyro.y = val_filtered_gyro_LPF(1);//imu.ygyro;
+		gyro.z = val_filtered_gyro_LPF(2);//imu.zgyro;
+//		gyro.x = imu.xgyro;
+//		gyro.y = imu.ygyro;
+//		gyro.z = imu.zgyro;
+
 		gyro.temperature = imu.temperature;
 
 		_gyro_pub.publish(gyro);
@@ -2027,14 +2128,22 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
 	/* accelerometer */
 	{
 		sensor_accel_s accel{};
+		const matrix::Vector3f val_filtered_acc_LPF{_filter_acc.apply({imu.xacc, imu.yacc, imu.zacc})};
+		val_filtered_acc(0) =  val_filtered_acc(0) * (1.0f - conf(0)) + imu.xacc*conf(0);
+		val_filtered_acc(1) =  val_filtered_acc(1) * (1.0f - conf(1)) + imu.yacc*conf(1);
+		val_filtered_acc(2) =  val_filtered_acc(2) * (1.0f - conf(2)) + imu.zacc*conf(2);
 
 		accel.timestamp = timestamp;
 		accel.x_raw = imu.xacc / (CONSTANTS_ONE_G / 1000.0f);
 		accel.y_raw = imu.yacc / (CONSTANTS_ONE_G / 1000.0f);
 		accel.z_raw = imu.zacc / (CONSTANTS_ONE_G / 1000.0f);
-		accel.x = imu.xacc;
-		accel.y = imu.yacc;
-		accel.z = imu.zacc;
+		accel.x = val_filtered_acc_LPF(0);//imu.xacc;
+		accel.y = val_filtered_acc_LPF(1);//imu.yacc;
+		accel.z = val_filtered_acc_LPF(2);//imu.zacc;
+//		accel.x = imu.xacc;
+//		accel.y = imu.yacc;
+//		accel.z = imu.zacc;
+
 		accel.temperature = imu.temperature;
 
 		_accel_pub.publish(accel);
@@ -2070,7 +2179,7 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
 	}
 
         //jsjeong
-        {
+/*        {
 		attack_status_s attack{};
 
 		attack.timestamp = timestamp;
@@ -2080,7 +2189,18 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
 
 		_attack_pub.publish(attack);
 	}
+*/
+/*	{
+		attacc_status_s attacc{};
 
+		attacc.timestamp = timestamp;
+		//attack.attack_trigger = _parameters.attack_trigger;
+		//attack.attack_frequency = _parameters.attack_frequency;
+        	//attack.attack_amplitude = _parameters.attack_apmlitude;
+
+		_attacc_pub.publish(attacc);
+	}
+*/
 	/* battery status */
 	{
 		battery_status_s hil_battery_status{};
@@ -2730,4 +2850,6 @@ MavlinkReceiver::update_params()
 	parameter_update_s param_update;
 	_param_update_sub.update(&param_update);
 	updateParams();
+	configure_filter_acc(_param_imu_accel_cutoff.get());
+	configure_filter_gyro(_param_imu_gyro_cutoff.get());
 }

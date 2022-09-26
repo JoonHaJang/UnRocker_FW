@@ -533,6 +533,19 @@ void VotedSensorsUpdate::accelPoll(struct sensor_combined_s &raw)
 	float *offsets[] = {_corrections.accel_offset_0, _corrections.accel_offset_1, _corrections.accel_offset_2 };
 	float *scales[] = {_corrections.accel_scale_0, _corrections.accel_scale_1, _corrections.accel_scale_2 };
 
+	//jsjeong
+/*	static double times_m_a = 0.0;
+	static double times_pre_a = 0.0;
+	static double times_diff_a = 0.0;
+        static float amp_offset_a = 0;
+        static float amp_offset_accel = 0;
+        static uint64_t abs_time_a;
+        abs_time_a = hrt_absolute_time();//+(rand()%2)*20;
+	times_m_a = (double) abs_time_a/1000000.0;
+	times_diff_a = times_m_a - times_pre_a;
+	times_pre_a = times_m_a;
+*/
+//	printf("Printf Test\n");
 	for (int uorb_index = 0; uorb_index < _accel.subscription_count; uorb_index++) {
 		bool accel_updated;
 		orb_check(_accel.subscription[uorb_index], &accel_updated);
@@ -541,6 +554,9 @@ void VotedSensorsUpdate::accelPoll(struct sensor_combined_s &raw)
 			sensor_accel_s accel_report;
 
 			int ret = orb_copy(ORB_ID(sensor_accel), _accel.subscription[uorb_index], &accel_report);
+
+        //         	abs_time_a = accel_report.timestamp;
+        //                times_m_a = (double) abs_time_a/1000000.0;
 
 			if (ret != PX4_OK || accel_report.timestamp == 0) {
 				continue; //ignore invalid data
@@ -600,7 +616,16 @@ void VotedSensorsUpdate::accelPoll(struct sensor_combined_s &raw)
 				_corrections_changed = true;
 			}
 
-			// rotate corrected measurements from sensor to body frame
+/*			if(_parameters.attacc_trigger == 1){
+				float Attack_param_a = (float) (2.0 * M_PI *  accel_report.timestamp * (double) _parameters.attacc_frequency / 1000000);
+
+                                amp_offset_a = _parameters.attacc_amplitude * cosf(Attack_param_a);
+				accel_data(0) += _parameters.attacc_amplitude * cosf(Attack_param_a);
+				accel_data(1) += _parameters.attacc_amplitude * cosf(Attack_param_a);
+				accel_data(2) += _parameters.attacc_amplitude * cosf(Attack_param_a);
+
+			}
+*/			// rotate corrected measurements from sensor to body frame
 			accel_data = _board_rotation * accel_data;
 
 			_last_sensor_data[uorb_index].accelerometer_m_s2[0] = accel_data(0);
@@ -608,11 +633,43 @@ void VotedSensorsUpdate::accelPoll(struct sensor_combined_s &raw)
 			_last_sensor_data[uorb_index].accelerometer_m_s2[2] = accel_data(2);
 
 			_last_accel_timestamp[uorb_index] = accel_report.timestamp;
+
+/*
+                        if(_parameters.attacc_trigger == 1)//log compromised signals
+                        {
+                            _attacc.attacc_accel0 = accel_data(0);
+                            _attacc.attacc_accel1 = accel_data(1);
+                            _attacc.attacc_accel2 = accel_data(2);
+                        }
+                        else if(_parameters.attacc_log_trigger == 1)//
+                        {
+                            amp_offset_accel = _parameters.attacc_amplitude * cosf((float) (2.0 * M_PI *  accel_report.timestamp * (double) _parameters.attacc_frequency / 1000000));
+                            _attacc.attacc_accel0 = accel_data(0)+amp_offset_accel;
+                            _attacc.attacc_accel1 = accel_data(1)+amp_offset_accel;
+                            _attacc.attacc_accel2 = accel_data(2)+amp_offset_accel;
+                        }
+                        else //log raw data
+                        {
+                            _attacc.attacc_accel0 = accel_data(0);
+                            _attacc.attacc_accel1 = accel_data(1);
+                            _attacc.attacc_accel2 = accel_data(2);
+                        }
+*/
 			_accel.voter.put(uorb_index, accel_report.timestamp, _last_sensor_data[uorb_index].accelerometer_m_s2,
 					 accel_report.error_count, _accel.priority[uorb_index]);
 		}
 	}
+/*        _attacc.timestamp       = abs_time_a;
+        _attacc.attacc_trigger = _parameters.attacc_trigger;
+        _attacc.attacc_frequency = (float) _parameters.attacc_frequency;
+        _attacc.attacc_amplitude = (float) _parameters.attacc_amplitude;
+        _attacc.attacc_log_trigger = _parameters.attacc_log_trigger;
 
+        _attacc.attacc_offset = (float) amp_offset_a;
+        _attacc.attacc_timediff = (float) times_diff_a;
+	
+	_attacc_pub.publish(_attacc);
+*/
 	// find the best sensor
 	int best_index;
 	_accel.voter.get_best(hrt_absolute_time(), &best_index);
@@ -644,12 +701,13 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 	static double times_pre = 0.0;
 	static double times_diff = 0.0;
         static float amp_offset = 0;
-        static uint64_t abs_time;
-        abs_time = hrt_absolute_time();
+//        static float amp_offset_gyro = 0;
+        static uint64_t abs_time = 0;
+/*        abs_time = hrt_absolute_time();//+(rand()%2)*20;
 	times_m = (double) abs_time/1000000.0;
 	times_diff = times_m - times_pre;
 	times_pre = times_m;
-	//
+*/	//
 
 	for (int uorb_index = 0; uorb_index < _gyro.subscription_count; uorb_index++) {
 		bool gyro_updated;
@@ -659,6 +717,18 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 			sensor_gyro_s gyro_report;
 
 			int ret = orb_copy(ORB_ID(sensor_gyro), _gyro.subscription[uorb_index], &gyro_report);
+
+			if(uorb_index ==0){
+                	        abs_time = gyro_report.timestamp;
+                        	times_m = (double) abs_time/1000000.0;
+				times_diff = times_m - times_pre;
+				times_pre = times_m;
+	       			_attack.timestamp       = hrt_absolute_time();//abs_time;
+        			_attack.attack_offset = (float) amp_offset;
+        			_attack.attack_timediff = (float) times_diff;
+        			_attack_pub.publish(_attack);
+			}
+
 
 			if (ret != PX4_OK || gyro_report.timestamp == 0) {
 				continue; //ignore invalid data
@@ -719,22 +789,18 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 			}
 
 			//attack_triggering, jsjeong
-			if(_parameters.attack_trigger == 1){
+			/*if(_parameters.attack_trigger == 1){
 				float Attack_param = (float) (2.0 * M_PI * times_m * (double) _parameters.attack_frequency);
-                                amp_offset = _parameters.attack_amplitude * sinf(Attack_param);
-			//	float Attack_param2 =_parameters.attack_amplitude * sinf(Attack_param);
-//				gyro_rate(0) += _parameters.attack_amplitude * sinf(2* M_PI * gyro_report.timestamp * (double) _parameters.attack_frequency / 1000000);
-//				gyro_rate(1) += _parameters.attack_amplitude * sinf(2* M_PI * gyro_report.timestamp * (double) _parameters.attack_frequency / 1000000);
-//				gyro_rate(2) += _parameters.attack_amplitude * sinf(2* M_PI * gyro_report.timestamp * (double) _parameters.attack_frequency / 1000000);
-				gyro_rate(0) += _parameters.attack_amplitude * sinf(Attack_param);
-				gyro_rate(1) += _parameters.attack_amplitude * sinf(Attack_param);
-				gyro_rate(2) += _parameters.attack_amplitude * sinf(Attack_param);
+                                amp_offset = _parameters.attack_amplitude * cosf(Attack_param);
+				gyro_rate(0) += _parameters.attack_amplitude * cosf(Attack_param);
+				gyro_rate(1) += _parameters.attack_amplitude * cosf(Attack_param);
+				gyro_rate(2) += _parameters.attack_amplitude * cosf(Attack_param);
 			//	printf("Attack signal %f", Attack_param2);
 				//printf("time difference is %lf\n", times_diff);
 
 
-//				printf("ATTACK triggered\n");
-			}
+
+			}*/
 
 
 			// rotate corrected measurements from sensor to body frame
@@ -746,20 +812,45 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 			_last_sensor_data[uorb_index].gyro_rad[2] = gyro_rate(2);
 
 			_last_sensor_data[uorb_index].timestamp = gyro_report.timestamp;
+
+
+/*                        if(_parameters.attack_trigger == 1)//log compromised signals
+                        {
+                            _attack.attack_gyro0 = gyro_rate(0);
+                            _attack.attack_gyro1 = gyro_rate(1);
+                            _attack.attack_gyro2 = gyro_rate(2);
+                        }
+                        else if(_parameters.attack_log_trigger == 1)//
+                        {
+//                            amp_offset_gyro = _parameters.attack_amplitude * sinf((float) (2.0 * M_PI * times_m * (double) _parameters.attack_frequency));
+                            amp_offset_gyro = _parameters.attack_amplitude * cosf((float) (2.0 * M_PI *  gyro_report.timestamp * (double) _parameters.attack_frequency / 1000000));
+                            _attack.attack_gyro0 = gyro_rate(0)+amp_offset_gyro;
+                            _attack.attack_gyro1 = gyro_rate(1)+amp_offset_gyro;
+                            _attack.attack_gyro2 = gyro_rate(2)+amp_offset_gyro;
+                        }
+                        else //log raw data
+                        {
+                            _attack.attack_gyro0 = gyro_rate(0);
+                            _attack.attack_gyro1 = gyro_rate(1);
+                            _attack.attack_gyro2 = gyro_rate(2);
+                        }
+
+*/
 			_gyro.voter.put(uorb_index, gyro_report.timestamp, _last_sensor_data[uorb_index].gyro_rad,
 					gyro_report.error_count, _gyro.priority[uorb_index]);
 		}
 	}
-        _attack.timestamp       = abs_time;
-        _attack.attack_trigger = _parameters.attack_trigger;
-        _attack.attack_frequency = (float) _parameters.attack_frequency;
-        _attack.attack_amplitude = (float) _parameters.attack_amplitude;
+/*       _attack.timestamp       = abs_time;
+        //_attack.attack_trigger = _parameters.attack_trigger;
+        //_attack.attack_frequency = (float) _parameters.attack_frequency;
+        //_attack.attack_amplitude = (float) _parameters.attack_amplitude;
+        //_attack.attack_log_trigger = _parameters.attack_log_trigger;
 
         _attack.attack_offset = (float) amp_offset;
         _attack.attack_timediff = (float) times_diff;
 
         _attack_pub.publish(_attack);
-
+*/
 	// find the best sensor
 	int best_index;
 	_gyro.voter.get_best(hrt_absolute_time(), &best_index);

@@ -102,7 +102,17 @@ set(msg_files
 	sensor_accel.msg
 	sensor_baro.msg
         attack_status.msg
-	sensor_bias.msg
+	attacc_status.msg
+	mpu6000_time.msg
+	sensor_true.msg
+	timelog_sensor.msg
+        timelog_local_position.msg
+        timelog_navigator.msg
+        timelog_mc_pos_control.msg
+        timelog_ekf2.msg
+        timelog_mc_att_control.msg
+        timelog_logger.msg
+        sensor_bias.msg
 	sensor_combined.msg
 	sensor_correction.msg
 	sensor_gyro.msg

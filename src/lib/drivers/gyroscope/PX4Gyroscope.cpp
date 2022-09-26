@@ -112,6 +112,25 @@ PX4Gyroscope::update(hrt_abstime timestamp, float x, float y, float z)
 	sensor_gyro_s &report = _sensor_gyro_pub.get();
 	report.timestamp = timestamp;
 
+/*	//jsjeong
+	//updateParams();
+	//_parameters_update();
+//	_attack_cmd_sub.update();
+//	const attack_cmd_s &attack_cmd = _attack_cmd_sub.get();
+
+	static double times_m = 0.0;
+	static double times_pre = 0.0;
+	static double times_diff = 0.0;
+        static float amp_offset = 0;
+	times_m = (double) timestamp/1000000.0;
+	times_diff = times_m - times_pre;
+	times_pre = times_m;
+
+
+
+	//jsjeong
+	
+*/
 	// Apply rotation (before scaling)
 	rotate_3f(_rotation, x, y, z);
 
@@ -119,6 +138,47 @@ PX4Gyroscope::update(hrt_abstime timestamp, float x, float y, float z)
 
 	// Apply range scale and the calibrating offset/scale
 	const matrix::Vector3f val_calibrated{(((raw * report.scaling) - _calibration_offset).emult(_calibration_scale))};
+
+/*	//jsjeong
+	if(_param_attack_trigger.get() == 1){
+	//if(attack_cmd.attack_trigger == 1){
+//		float Attack_param = (float) (2.0 * M_PI * times_m * (double) attack_cmd.attack_frequency);
+//                amp_offset = attack_cmd.attack_amplitude * cosf(Attack_param);
+
+		float Attack_param = (float) (2.0 * M_PI * times_m * (double) _param_attack_freq.get());
+                amp_offset = _param_attack_amp.get() * cosf(Attack_param);
+		calibrated_attack(0) = val_calibrated(0) + amp_offset;
+		calibrated_attack(1) = val_calibrated(1) + amp_offset;
+		calibrated_attack(2) = val_calibrated(2) + amp_offset;
+		printf("attack\n");
+	}
+	else
+	{
+		calibrated_attack(0) = val_calibrated(0);
+		calibrated_attack(1) = val_calibrated(1);
+		calibrated_attack(2) = val_calibrated(2);
+		printf("Attack untriggered\n");
+
+	}
+        _attack.timestamp       = timestamp;
+//        _attack.attack_trigger = attack_cmd.attack_trigger;
+//        _attack.attack_frequency = (float) attack_cmd.attack_frequency;
+//        _attack.attack_amplitude = (float) attack_cmd.attack_amplitude;
+        _attack.attack_trigger = _param_attack_trigger.get();
+        _attack.attack_frequency = (float) _param_attack_freq.get();
+        _attack.attack_amplitude = (float) _param_attack_amp.get();
+
+
+        _attack.attack_offset = (float) amp_offset;
+        _attack.attack_timediff = (float) times_diff;
+
+//        _attack_pub.publish(_attack);
+//      jsjeong
+//	if(_param_imu_gyro_rate_max.get()==1){
+//
+//		printf("Test\n\n");
+//	}
+//	const matrix::Vector3f val_filtered{_filter.apply(calibrated_attack)};///*/
 
 	// Filtered values
 	const matrix::Vector3f val_filtered{_filter.apply(val_calibrated)};

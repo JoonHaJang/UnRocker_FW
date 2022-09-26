@@ -76,6 +76,7 @@
 #include <uORB/topics/vehicle_odometry.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/wind_estimate.h>
+#include <uORB/topics/timelog_ekf2.h>
 
 // defines used to specify the mask position for use of different accuracy metrics in the GPS blending algorithm
 #define BLEND_MASK_USE_SPD_ACC      1
@@ -254,6 +255,9 @@ private:
 	int32_t _gps_alttitude_ellipsoid[GPS_MAX_RECEIVERS] {};	///< altitude in 1E-3 meters (millimeters) above ellipsoid
 	uint64_t _gps_alttitude_ellipsoid_previous_timestamp[GPS_MAX_RECEIVERS] {}; ///< storage for previous timestamp to compute dt
 	float   _wgs84_hgt_offset = 0;  ///< height offset between AMSL and WGS84
+
+        timelog_ekf2_s _t_ekf2 {};//jsjeong
+        uORB::Publication<timelog_ekf2_s>	        _t_ekf2_pub{ORB_ID(timelog_ekf2)};	/**< combined sensor data topic */
 
 	uORB::Subscription _airdata_sub{ORB_ID(vehicle_air_data)};
 	uORB::Subscription _airspeed_sub{ORB_ID(airspeed)};
@@ -709,8 +713,15 @@ void Ekf2::run()
 	vehicle_status_s vehicle_status = {};
 	sensor_selection_s sensor_selection = {};
 
+        static uint64_t t_start, t_end, t_prev, t_int, t_elapse;
+        t_prev = 0;
+
 	while (!should_exit()) {
-		int ret = px4_poll(fds, sizeof(fds) / sizeof(fds[0]), 1000);
+                t_start = hrt_absolute_time();
+                t_int = t_start - t_prev;
+                t_prev = t_start;
+
+                int ret = px4_poll(fds, sizeof(fds) / sizeof(fds[0]), 1000);
 
 		if (!(fds[0].revents & POLLIN)) {
 			// no new data
@@ -1709,7 +1720,16 @@ void Ekf2::run()
 
 		// publish ekf2_timestamps
 		_ekf2_timestamps_pub.publish(ekf2_timestamps);
-	}
+
+                t_end = hrt_absolute_time();
+                t_elapse = t_end - t_start;
+
+                _t_ekf2.timestamp = t_end;
+                _t_ekf2.e_time = t_elapse;
+                _t_ekf2.interval = t_int;
+                _t_ekf2_pub.publish(_t_ekf2);
+
+        }
 }
 
 int Ekf2::getRangeSubIndex()

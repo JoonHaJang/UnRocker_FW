@@ -45,6 +45,9 @@
 #include <perf/perf_counter.h>
 #include <px4_getopt.h>
 #include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
+#include <uORB/topics/mpu6000_time.h>
+#include <uORB/uORB.h>
+
 
 #define L3GD20_DEVICE_PATH "/dev/l3gd20"
 
@@ -202,6 +205,8 @@ private:
 	perf_counter_t		_duplicates;
 
 	uint8_t			_register_wait{0};
+	orb_advert_t _mpu6000_time_pub{nullptr};
+	mpu6000_time_s 		_mpu6000_time {};
 
 	/* true if an L3G4200D is detected */
 	bool	_is_l3g4200d{false};
@@ -371,6 +376,7 @@ L3GD20::probe()
 
 	/* verify that the device is attached and functioning, accept
 	 * L3GD20, L3GD20H and L3G4200D */
+	
 	if ((v = read_reg(ADDR_WHO_AM_I)) == WHO_I_AM) {
 		_orientation = SENSOR_BOARD_ROTATION_DEFAULT;
 		success = true;
@@ -523,6 +529,10 @@ L3GD20::start()
 	/* start polling at the specified rate */
 	uint64_t interval = 1000000 / L3G4200D_DEFAULT_RATE;
 	ScheduleOnInterval(interval - L3GD20_TIMER_REDUCTION, 10000);
+
+
+//	ScheduleOnInterval(interval,10000);
+
 }
 
 void
@@ -558,8 +568,9 @@ void
 L3GD20::reset()
 {
 	// ensure the chip doesn't interpret any other bus traffic as I2C
-	disable_i2c();
-
+	///disable_i2c();
+	//commented by jsjeong
+	
 	/* set default configuration */
 	write_checked_reg(ADDR_CTRL_REG1, REG1_POWER_NORMAL | REG1_Z_ENABLE | REG1_Y_ENABLE | REG1_X_ENABLE);
 	write_checked_reg(ADDR_CTRL_REG2, 0);		/* disable high-pass filters */
@@ -700,6 +711,17 @@ L3GD20::measure()
 
 	/* stop the perf counter */
 	perf_end(_sample_perf);
+
+//	static uint64_t prev_time = 0;
+//	_mpu6000_time.timestamp = timestamp_sample;
+//	_mpu6000_time.time_log	= timestamp_sample-prev_time;
+//	prev_time = timestamp_sample;
+
+//	int mpu6000_time_multi;
+//	orb_publish_auto(ORB_ID(mpu6000_time), &_mpu6000_time_pub, &_mpu6000_time,
+//				 &mpu6000_time_multi, ORB_PRIO_HIGH);
+
+
 }
 
 void

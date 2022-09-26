@@ -44,6 +44,9 @@
 #include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
 #include <lib/drivers/accelerometer/PX4Accelerometer.hpp>
 #include <lib/drivers/magnetometer/PX4Magnetometer.hpp>
+#include <uORB/topics/mpu6000_time.h>
+#include <uORB/uORB.h>
+
 
 /* SPI protocol address bits */
 #define DIR_READ			(1<<7)
@@ -280,6 +283,10 @@ private:
 	perf_counter_t		_bad_registers;
 	perf_counter_t		_bad_values;
 	perf_counter_t		_accel_duplicates;
+
+
+	orb_advert_t _mpu6000_time_pub{nullptr};
+	mpu6000_time_s 		_mpu6000_time {};
 
 	uint8_t			_register_wait{0};
 

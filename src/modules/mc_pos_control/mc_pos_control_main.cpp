@@ -59,6 +59,7 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_trajectory_waypoint.h>
 #include <uORB/topics/landing_gear.h>
+#include <uORB/topics/timelog_mc_pos_control.h> 
 
 #include <float.h>
 #include <mathlib/mathlib.h>
@@ -113,6 +114,9 @@ private:
 	orb_advert_t _mavlink_log_pub{nullptr};
 
 	orb_id_t _attitude_setpoint_id{nullptr};
+
+        timelog_mc_pos_control_s _t_mc_pos_control {};//jsjeong
+        uORB::Publication<timelog_mc_pos_control_s>	        _t_mc_pos_control_pub{ORB_ID(timelog_mc_pos_control)};	/**< combined sensor data topic */
 
 	uORB::Publication<landing_gear_s>			_landing_gear_pub{ORB_ID(landing_gear)};
 	uORB::Publication<vehicle_local_position_setpoint_s>	_local_pos_sp_pub{ORB_ID(vehicle_local_position_setpoint)};	/**< vehicle local position setpoint publication */
@@ -508,8 +512,15 @@ MulticopterPositionControl::run()
 	poll_fd.fd = _local_pos_sub;
 	poll_fd.events = POLLIN;
 
+        static uint64_t t_start, t_end, t_prev, t_int, t_elapse;
+        t_prev = 0;
+
 	while (!should_exit()) {
-		// poll for new data on the local position state topic (wait for up to 20ms)
+                t_start = hrt_absolute_time();
+                t_int = t_start - t_prev;
+                t_prev = t_start;
+
+                // poll for new data on the local position state topic (wait for up to 20ms)
 		const int poll_return = px4_poll(&poll_fd, 1, 20);
 
 		// poll_return == 0: go through the loop anyway to copy manual input at 50 Hz
@@ -719,7 +730,12 @@ MulticopterPositionControl::run()
 			_att_sp.q_d_valid = true;
 			_att_sp.thrust_body[2] = 0.0f;
 		}
-	}
+                _t_mc_pos_control.timestamp = t_end;
+                _t_mc_pos_control.e_time = t_elapse;
+                _t_mc_pos_control.interval = t_int;
+                _t_mc_pos_control_pub.publish(_t_mc_pos_control);
+
+        }
 
 	orb_unsubscribe(_local_pos_sub);
 }

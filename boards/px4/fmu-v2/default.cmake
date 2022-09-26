@@ -35,9 +35,9 @@ px4_add_board(
 		#heater
 		#imu/adis16448
 		#imu # all available imu drivers
-		imu/l3gd20
+		imu/l3gd20##disabled by jsjeong
 		imu/lsm303d
-		imu/mpu6000
+		###imu/mpu6000
 		#imu/mpu9250
 		#iridiumsbd
 		#irlock
@@ -63,13 +63,13 @@ px4_add_board(
 
 	MODULES
 		#attitude_estimator_q
-		camera_feedback
+		###camera_feedback
 		commander
 		dataman
 		ekf2
 		events
-		fw_att_control
-		fw_pos_control_l1
+		###fw_att_control
+		###fw_pos_control_l1
 		#rover_pos_control
 		land_detector
 		#landing_target_estimator

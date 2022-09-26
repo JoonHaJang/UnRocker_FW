@@ -67,6 +67,7 @@
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_odometry.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/attack_status.h>
 #include <uORB/uORB.h>
 
 #include <v2.0/common/mavlink.h>
@@ -279,6 +280,7 @@ private:
 	orb_advert_t _gpos_pub{nullptr};
 	orb_advert_t _lpos_pub{nullptr};
 	orb_advert_t _rc_channels_pub{nullptr};
+	orb_advert_t _attack_status_pub{nullptr};
 
 	// uORB subscription handlers
 	int _actuator_outputs_sub{-1};
@@ -299,13 +301,19 @@ private:
 	manual_control_setpoint_s _manual {};
 	vehicle_attitude_s _attitude {};
 	vehicle_status_s _vehicle_status {};
+	attack_status_s _attack_status {};
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::SIM_BAT_DRAIN>) _param_sim_bat_drain, ///< battery drain interval
 		(ParamFloat<px4::params::SIM_BAT_MIN_PCT>) _battery_min_percentage, //< minimum battery percentage
 		(ParamInt<px4::params::MAV_TYPE>) _param_mav_type,
 		(ParamInt<px4::params::MAV_SYS_ID>) _param_mav_sys_id,
-		(ParamInt<px4::params::MAV_COMP_ID>) _param_mav_comp_id
+		(ParamInt<px4::params::MAV_COMP_ID>) _param_mav_comp_id,
+		(ParamInt<px4::params::ATTACK_TRIGGER>) _param_sim_attack_trg, 
+		(ParamFloat<px4::params::ATTACK_FREQ>) _param_sim_attack_frq,
+		(ParamFloat<px4::params::ATTACK_AMP>) _param_sim_attack_amp,
+		(ParamInt<px4::params::ATTACK_GYRLOG>) _param_sim_attack_log
+
 	)
 
 #endif

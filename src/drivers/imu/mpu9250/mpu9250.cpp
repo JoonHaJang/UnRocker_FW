@@ -501,6 +501,7 @@ MPU9250::start()
 {
 	/* make sure we are stopped first */
 	stop();
+//	ScheduleOnInterval(_call_interval, 1000);
 
 	ScheduleOnInterval(_call_interval - MPU9250_TIMER_REDUCTION, 1000);
 }
@@ -778,10 +779,31 @@ MPU9250::measure()
 		/* NOTE: Axes have been swapped to match the board a few lines above. */
 		_px4_accel.update(timestamp_sample, report.accel_x, report.accel_y, report.accel_z);
 		_px4_gyro.update(timestamp_sample, report.gyro_x, report.gyro_y, report.gyro_z);
+
+		static uint64_t prev_time = 0;
+		_mpu6000_time.timestamp = timestamp_sample;
+		_mpu6000_time.time_log	= timestamp_sample-prev_time;
+		prev_time = timestamp_sample;
+
+		int mpu6000_time_multi;
+		orb_publish_auto(ORB_ID(mpu6000_time), &_mpu6000_time_pub, &_mpu6000_time,
+				 &mpu6000_time_multi, ORB_PRIO_HIGH);
+
 	}
 
 	/* stop measuring */
 	perf_end(_sample_perf);
+
+
+//	static uint64_t prev_time = 0;
+//	_mpu6000_time.timestamp = timestamp_sample;
+//	_mpu6000_time.time_log	= timestamp_sample-prev_time;
+//	prev_time = timestamp_sample;
+
+//	int mpu6000_time_multi;
+//	orb_publish_auto(ORB_ID(mpu6000_time), &_mpu6000_time_pub, &_mpu6000_time,
+//				 &mpu6000_time_multi, ORB_PRIO_HIGH);
+
 }
 
 void

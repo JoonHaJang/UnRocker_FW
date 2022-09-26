@@ -134,6 +134,7 @@ typedef struct {
 // in the controller chain, but provides easy-to-use data to the more
 // complex downstream consumers
 #define SCHED_PRIORITY_SENSOR_HUB		(PX4_WQ_HP_BASE - 6)
+//#define SCHED_PRIORITY_SENSOR_HUB		(SCHED_PRIORITY_MAX - 1)
 
 // The log capture (which stores log data into RAM) should run faster
 // than other components, but should not run before the control pipeline

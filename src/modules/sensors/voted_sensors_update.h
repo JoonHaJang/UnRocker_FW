@@ -56,6 +56,7 @@
 #include <uORB/PublicationQueued.hpp>
 #include <uORB/topics/sensor_combined.h>
 #include <uORB/topics/attack_status.h>
+#include <uORB/topics/attacc_status.h>
 #include <uORB/topics/sensor_preflight.h>
 #include <uORB/topics/sensor_correction.h>
 #include <uORB/topics/sensor_selection.h>
@@ -249,6 +250,7 @@ private:
 	SensorData _baro {};
 
         attack_status_s _attack {};//jsjeong
+	attacc_status_s _attacc {};//jsjeong
 
 	orb_advert_t _mavlink_log_pub{nullptr};
 
@@ -256,6 +258,7 @@ private:
 	uORB::Publication<sensor_selection_s>	_sensor_selection_pub{ORB_ID(sensor_selection)};	/**< handle to the sensor selection uORB topic */
 
         uORB::Publication<attack_status_s> _attack_pub{ORB_ID(attack_status)};//jsjeong
+	uORB::Publication<attacc_status_s> _attacc_pub{ORB_ID(attacc_status)};//jsjeong
 
 	sensor_combined_s _last_sensor_data[SENSOR_COUNT_MAX] {};	/**< latest sensor data from all sensors instances */
 	vehicle_air_data_s _last_airdata[SENSOR_COUNT_MAX] {};		/**< latest sensor data from all sensors instances */

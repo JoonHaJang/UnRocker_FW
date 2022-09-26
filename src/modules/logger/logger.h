@@ -50,6 +50,8 @@
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/vehicle_status.h>
+//#include <uORB/topics/timelog_logger.h>
+//#include <uORB/topics/sensor_true.h>
 
 extern "C" __EXPORT int logger_main(int argc, char *argv[]);
 
@@ -163,6 +165,8 @@ public:
 	void print_statistics(LogType type);
 
 	void set_arm_override(bool override) { _manually_logging_override = override; }
+
+
 
 private:
 
@@ -396,6 +400,8 @@ private:
 	print_load_s					_load{}; ///< process load data
 	hrt_abstime					_next_load_print{0}; ///< timestamp when to print the process load
 	PrintLoadReason					_print_load_reason {PrintLoadReason::Preflight};
+//        timelog_logger_s _t_logger {};//jsjeong
+//        uORB::Publication<timelog_logger_s>	        _t_logger_pub{ORB_ID(timelog_logger)};
 
 	uORB::Subscription				_manual_control_sp_sub{ORB_ID(manual_control_setpoint)};
 	uORB::Subscription				_vehicle_command_sub{ORB_ID(vehicle_command)};

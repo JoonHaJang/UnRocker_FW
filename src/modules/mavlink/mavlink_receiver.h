@@ -47,6 +47,8 @@
 #include "mavlink_parameters.h"
 #include "mavlink_timesync.h"
 
+#include <matrix/math.hpp>
+#include <mathlib/math/filter/LowPassFilter2pVector3f.hpp>
 #include <px4_module_params.h>
 #include <uORB/Publication.hpp>
 #include <uORB/PublicationQueued.hpp>
@@ -79,6 +81,7 @@
 #include <uORB/topics/sensor_accel.h>
 #include <uORB/topics/sensor_baro.h>
 #include <uORB/topics/attack_status.h>//jsjeong
+#include <uORB/topics/attacc_status.h>//jsjeong
 #include <uORB/topics/sensor_combined.h>
 #include <uORB/topics/sensor_gyro.h>
 #include <uORB/topics/sensor_mag.h>
@@ -98,6 +101,8 @@
 #include <uORB/topics/vehicle_rates_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_trajectory_waypoint.h>
+
+using matrix::Vector3f;
 
 class Mavlink;
 
@@ -202,6 +207,11 @@ private:
 	 * @brief Updates the battery, optical flow, and flight ID subscribed parameters.
 	 */
 	void update_params();
+	
+//	void set_sample_rate(unsigned rate);
+	void configure_filter_gyro(float cutoff_freq) { _filter_gyro.set_cutoff_frequency(_sample_rate, cutoff_freq); }
+	void configure_filter_acc(float cutoff_freq) { _filter_acc.set_cutoff_frequency(_sample_rate, cutoff_freq); }
+
 
 	Mavlink				*_mavlink;
 
@@ -249,6 +259,7 @@ private:
 	uORB::PublicationMulti<sensor_accel_s>			_accel_pub{ORB_ID(sensor_accel), ORB_PRIO_LOW};
 	uORB::PublicationMulti<sensor_baro_s>			_baro_pub{ORB_ID(sensor_baro), ORB_PRIO_LOW};
 	uORB::PublicationMulti<attack_status_s>			_attack_pub{ORB_ID(attack_status), ORB_PRIO_LOW};
+	uORB::PublicationMulti<attacc_status_s>			_attacc_pub{ORB_ID(attacc_status), ORB_PRIO_LOW};
         uORB::PublicationMulti<sensor_gyro_s>			_gyro_pub{ORB_ID(sensor_gyro), ORB_PRIO_LOW};
 	uORB::PublicationMulti<sensor_mag_s>			_mag_pub{ORB_ID(sensor_mag), ORB_PRIO_LOW};
 
@@ -265,6 +276,8 @@ private:
 	uORB::Subscription	_vehicle_attitude_sub{ORB_ID(vehicle_attitude)};
 	uORB::Subscription	_vehicle_local_position_sub{ORB_ID(vehicle_local_position)};
 
+	math::LowPassFilter2pVector3f _filter_gyro{1000, 100};
+	math::LowPassFilter2pVector3f _filter_acc{1000, 100};
 	static constexpr unsigned int	MOM_SWITCH_COUNT{8};
 	uint8_t				_mom_switch_pos[MOM_SWITCH_COUNT] {};
 	uint16_t			_mom_switch_state{0};
@@ -276,6 +289,10 @@ private:
 	bool				_hil_local_proj_inited{false};
 
 	hrt_abstime			_last_utm_global_pos_com{0};
+	unsigned		_sample_rate{250};
+	Vector3f		val_filtered_gyro{0.0f,0.0f,0.0f};
+	Vector3f		val_filtered_acc{0.0f,0.0f,0.0f};
+	Vector3f 		conf{0.22222222f, 0.22222222f, 0.2f};
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::BAT_CRIT_THR>)     _param_bat_crit_thr,
@@ -285,8 +302,19 @@ private:
 		(ParamFloat<px4::params::SENS_FLOW_MAXHGT>) _param_sens_flow_maxhgt,
 		(ParamFloat<px4::params::SENS_FLOW_MAXR>)   _param_sens_flow_maxr,
 		(ParamFloat<px4::params::SENS_FLOW_MINHGT>) _param_sens_flow_minhgt,
-		(ParamInt<px4::params::SENS_FLOW_ROT>)      _param_sens_flow_rot
-	);
+		(ParamInt<px4::params::SENS_FLOW_ROT>)      _param_sens_flow_rot,
+//                (ParamInt<px4::params::ATTACK_TRIGGER>) _param_sim_attack_trg,
+//                (ParamFloat<px4::params::ATTACK_FREQ>) _param_sim_attack_frq,
+//                (ParamFloat<px4::params::ATTACK_AMP>) _param_sim_attack_amp,
+//                (ParamInt<px4::params::ATTACK_GYRLOG>) _param_sim_attack_log,
+//                (ParamInt<px4::params::ATTACC_TRIGGER>) _param_sim_attacc_trg,
+//                (ParamFloat<px4::params::ATTACC_FREQ>) _param_sim_attacc_frq,
+//                (ParamFloat<px4::params::ATTACC_AMP>) _param_sim_attacc_amp,
+//                (ParamInt<px4::params::ATTACC_ACCLOG>) _param_sim_attacc_log,
+		(ParamFloat<px4::params::IMU_GYRO_CUTOFF>) _param_imu_gyro_cutoff,
+		(ParamFloat<px4::params::IMU_ACCEL_CUTOFF>) _param_imu_accel_cutoff
+	
+		);
 
 	// Disallow copy construction and move assignment.
 	MavlinkReceiver(const MavlinkReceiver &) = delete;

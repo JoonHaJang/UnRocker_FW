@@ -58,6 +58,7 @@
 #include <px4_tasks.h>
 #include <systemlib/mavlink_log.h>
 
+
 /**
  * navigator app start / stop handling function
  *
@@ -161,7 +162,14 @@ Navigator::run()
 
 	hrt_abstime last_geofence_check = 0;
 
+        static uint64_t t_start, t_end, t_prev, t_int, t_elapse;
+        t_prev = 0;
+
 	while (!should_exit()) {
+
+                t_start = hrt_absolute_time();
+                t_int = t_start - t_prev;
+                t_prev = t_start;
 
 		/* wait for up to 1000ms for data */
 		int pret = px4_poll(&fds[0], (sizeof(fds) / sizeof(fds[0])), 1000);
@@ -679,7 +687,15 @@ Navigator::run()
 		}
 
 		perf_end(_loop_perf);
-	}
+
+                t_end = hrt_absolute_time();
+                t_elapse = t_end - t_start;
+
+                _t_navigator.timestamp = t_end;
+                _t_navigator.e_time = t_elapse;
+                _t_navigator.interval = t_int;
+                _t_navigator_pub.publish(_t_navigator);
+        }
 }
 
 int Navigator::task_spawn(int argc, char *argv[])

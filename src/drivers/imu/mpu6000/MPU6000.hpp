@@ -66,6 +66,8 @@
 #include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
 #include <systemlib/conversions.h>
 #include <systemlib/px4_macros.h>
+#include <uORB/topics/mpu6000_time.h>
+#include <uORB/uORB.h>
 
 
 /*
@@ -366,6 +368,7 @@ private:
 
 	uint8_t			_register_wait{0};
 	uint64_t		_reset_wait{0};
+	orb_advert_t _mpu6000_time_pub{nullptr};
 
 	// this is used to support runtime checking of key
 	// configuration registers to detect SPI bus errors and sensor
@@ -388,7 +391,7 @@ private:
 
 	uint8_t			_checked_values[MPU6000_NUM_CHECKED_REGISTERS];
 	uint8_t			_checked_next{0};
-
+	mpu6000_time_s 		_mpu6000_time {};
 	// use this to avoid processing measurements when in factory
 	// self test
 	volatile bool		_in_factory_test{false};

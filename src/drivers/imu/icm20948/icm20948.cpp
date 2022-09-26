@@ -908,6 +908,17 @@ ICM20948::measure()
 
 	/* stop measuring */
 	perf_end(_sample_perf);
+
+//	static uint64_t prev_time = 0;
+//	_mpu6000_time.timestamp = timestamp_sample;
+//	_mpu6000_time.time_log	= timestamp_sample-prev_time;
+//	prev_time = timestamp_sample;
+
+//	int mpu6000_time_multi;
+//	orb_publish_auto(ORB_ID(mpu6000_time), &_mpu6000_time_pub, &_mpu6000_time,
+//				 &mpu6000_time_multi, ORB_PRIO_HIGH);
+
+
 }
 
 void

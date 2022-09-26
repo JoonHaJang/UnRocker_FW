@@ -90,6 +90,7 @@ MulticopterAttitudeControl::~MulticopterAttitudeControl()
 bool
 MulticopterAttitudeControl::init()
 {
+//	printf("\n\n ATTCTRL \n\n");
 	if (!_vehicle_angular_velocity_sub.register_callback()) {
 		PX4_ERR("vehicle_angular_velocity callback registration failed!");
 		return false;
@@ -357,6 +358,7 @@ MulticopterAttitudeControl::generate_attitude_setpoint(float dt, bool reset_yaw_
 void
 MulticopterAttitudeControl::control_attitude()
 {
+	//printf("Test print??\n\n");
 	_v_att_sp_sub.update(&_v_att_sp);
 
 	// reinitialize the setpoint while not armed to make sure no value from the last mode or flight is still kept
@@ -527,12 +529,22 @@ MulticopterAttitudeControl::publish_actuator_controls()
 void
 MulticopterAttitudeControl::Run()
 {
+
+//	printf("\n\nMC Att Running??\n run \n");
 	if (should_exit()) {
+//		printf("\n\nTerminated Here\n\n\n");
 		_vehicle_angular_velocity_sub.unregister_callback();
 		exit_and_cleanup();
 		return;
 	}
 
+        static uint64_t t_start, t_end, t_int, t_elapse;
+        static uint64_t t_prev = 0;
+
+        t_start = hrt_absolute_time();
+        t_int = t_start - t_prev;
+        t_prev = t_start;
+//	printf("Running??\n");
 	perf_begin(_loop_perf);
 
 	/* run controller on gyro changes */
@@ -671,10 +683,38 @@ MulticopterAttitudeControl::Run()
 			}
 		}
 
+		//printf("Sensor true running \n");
 		parameter_update_poll();
+		_sensor_true.timestamp = angular_velocity.timestamp_sample;
+		_sensor_true.cmd_gyro0 = _rates_sp(0);
+		_sensor_true.cmd_gyro1 = _rates_sp(1);
+		_sensor_true.cmd_gyro2 = _rates_sp(2);
+		_sensor_true.true_gyro0 = rates(0);
+		_sensor_true.true_gyro1 = rates(1);
+		_sensor_true.true_gyro2 = rates(2);
+		
+		_sensor_true.cmd_q0 = fabsf(_v_att_sp.q_d[0]);
+		_sensor_true.cmd_q1 = fabsf(_v_att_sp.q_d[1]);
+		_sensor_true.cmd_q2 = fabsf(_v_att_sp.q_d[2]);
+		_sensor_true.cmd_q3 = fabsf(_v_att_sp.q_d[3]);
+		_sensor_true.true_q0 = fabsf(_v_att.q[0]);
+		_sensor_true.true_q1 = fabsf(_v_att.q[1]);
+		_sensor_true.true_q2 = fabsf(_v_att.q[2]);
+		_sensor_true.true_q3 = fabsf(_v_att.q[3]);
+
+       		_sensor_true_pub.publish(_sensor_true);
+
 	}
 
 	perf_end(_loop_perf);
+        t_end = hrt_absolute_time();
+        t_elapse = t_end - t_start;
+
+        _t_mc_att_control.timestamp = t_end;
+        _t_mc_att_control.e_time = t_elapse;
+        _t_mc_att_control.interval = t_int;
+        _t_mc_att_control_pub.publish(_t_mc_att_control);
+
 }
 
 int MulticopterAttitudeControl::task_spawn(int argc, char *argv[])
@@ -686,6 +726,7 @@ int MulticopterAttitudeControl::task_spawn(int argc, char *argv[])
 		_task_id = task_id_is_work_queue;
 
 		if (instance->init()) {
+			//printf("Initialize ok\n\n");
 			return PX4_OK;
 		}
 
@@ -752,5 +793,6 @@ To reduce control latency, the module directly polls on the gyro topic published
 
 int mc_att_control_main(int argc, char *argv[])
 {
+	//printf("\n\n main func\n\n");
 	return MulticopterAttitudeControl::main(argc, argv);
 }

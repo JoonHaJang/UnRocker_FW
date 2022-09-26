@@ -48,6 +48,9 @@
 #include <uORB/uORBTopics.h>
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/vehicle_command_ack.h>
+//#include <uORB/topics/sensor_true.h>
+#include <uORB/topics/mpu6000_time.h>
+
 
 #include <drivers/drv_hrt.h>
 #include <mathlib/math/Limits.hpp>
@@ -530,7 +533,7 @@ void Logger::add_default_topics()
 	add_topic("position_setpoint_triplet", 200);
 	add_topic("radio_status");
 	add_topic("rate_ctrl_status", 200);
-	add_topic("sensor_combined", 100);
+	add_topic("sensor_combined");
 	add_topic("sensor_preflight", 200);
 	add_topic("system_power", 500);
 	add_topic("tecs_status", 200);
@@ -545,11 +548,22 @@ void Logger::add_default_topics()
 	add_topic("vehicle_local_position", 100);
 	add_topic("vehicle_local_position_setpoint", 100);
 	add_topic("vehicle_magnetometer", 200);
-	add_topic("vehicle_rates_setpoint", 20);
+//	add_topic("vehicle_rates_setpoint", 20);
+	add_topic("vehicle_rates_setpoint");//jsjeong
 	add_topic("vehicle_status", 200);
 	add_topic("vehicle_status_flags");
 	add_topic("vtol_vehicle_status", 200);
-        add_topic("attack_status",5);//jsjeong
+        add_topic("attack_status");//jsjeong
+	add_topic("attacc_status");//jsjeong
+	add_topic("sensor_true");//jsjeong
+        add_topic("mpu6000_time");//jsjeong
+        add_topic("timelog_sensor");//jsjeong
+        add_topic("timelog_local_position",200);//jsjeong
+        add_topic("timelog_navigator",200);//jsjeong
+        add_topic("timelog_mc_pos_constrol",200);//jsjeong
+        add_topic("timelog_ekf2",200);//jsjeong
+        add_topic("timelog_mc_att_control",200);//jsjeong
+//        add_topic("timelog_logger",5);//jsjeong
 
 	add_topic_multi("actuator_outputs", 100);
 	add_topic_multi("battery_status", 500);
@@ -937,8 +951,13 @@ void Logger::run()
 	// check for new subscription data
 	hrt_abstime next_subscribe_check = 0;
 	int next_subscribe_topic_index = -1; // this is used to distribute the checks over time
+//        static uint64_t t_start, t_end, t_prev, t_int, t_elapse;
+//        t_prev = 0;
 
 	while (!should_exit()) {
+//                t_start = hrt_absolute_time();
+//                t_int = t_start - t_prev;
+//                t_prev = t_start;
 
 		// Start/stop logging (depending on logging mode, by default when arming/disarming)
 		const bool logging_started = start_stop_logging((MissionLogType)mission_log_mode);
@@ -1152,7 +1171,15 @@ void Logger::run()
 			 */
 			while (px4_sem_wait(&timer_callback_data.semaphore) != 0);
 		}
-	}
+  //              t_end = hrt_absolute_time();
+  //              t_elapse = t_end - t_start;
+//
+//                _t_logger.timestamp = t_end;
+//                _t_logger.e_time = t_elapse;
+//                _t_logger.interval = t_int;
+//                _t_logger_pub.publish(_t_logger);
+
+        }
 
 	stop_log_file(LogType::Full);
 	stop_log_file(LogType::Mission);

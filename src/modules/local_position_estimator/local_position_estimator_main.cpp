@@ -43,6 +43,7 @@
 #include <px4_log.h>
 #include <px4_module.h>
 #include <px4_tasks.h>
+#include <uORB/topics/timelog_local_position.h>
 
 #include "BlockLocalPositionEstimator.hpp"
 
@@ -70,6 +71,8 @@ public:
 
 private:
 	BlockLocalPositionEstimator _estimator;
+        timelog_local_position_s _t_l_position {};//jsjeong
+        uORB::Publication<timelog_local_position_s>	 _t_l_position_pub{ORB_ID(timelog_local_position)};
 };
 
 int LocalPositionEstimatorModule::print_usage(const char *reason)
@@ -128,9 +131,24 @@ LocalPositionEstimatorModule *LocalPositionEstimatorModule::instantiate(int argc
 
 void LocalPositionEstimatorModule::run()
 {
-	while (!should_exit()) {
-		_estimator.update();
-	}
+        static uint64_t t_start, t_end, t_prev, t_int, t_elapse;
+        t_prev = 0;
+
+        while (!should_exit()) {
+                t_start = hrt_absolute_time();
+                t_int = t_start - t_prev;
+                t_prev = t_start;
+
+                _estimator.update();
+
+                t_end = hrt_absolute_time();
+                t_elapse = t_end - t_start;
+
+                _t_l_position.timestamp = t_end;
+                _t_l_position.e_time = t_elapse;
+                _t_l_position.interval = t_int;
+                _t_l_position_pub.publish(_t_l_position);
+        }
 }
 
 

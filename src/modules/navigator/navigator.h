@@ -78,6 +78,8 @@
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/timelog_navigator.h>
+
 #include <uORB/uORB.h>
 
 /**
@@ -312,6 +314,8 @@ private:
 	)
 
 	int		_local_pos_sub{-1};		/**< local position subscription */
+        timelog_navigator_s _t_navigator {};//jsjeong
+        uORB::Publication<timelog_navigator_s>	        _t_navigator_pub{ORB_ID(timelog_navigator)};	/**< combined sensor data topic */
 
 	uORB::Subscription _global_pos_sub{ORB_ID(vehicle_global_position)};	/**< global position subscription */
 	uORB::Subscription _gps_pos_sub{ORB_ID(vehicle_gps_position)};		/**< gps position subscription */

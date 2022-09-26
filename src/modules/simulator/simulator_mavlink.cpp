@@ -225,15 +225,46 @@ void Simulator::update_sensors(const hrt_abstime &time, const mavlink_hil_sensor
 	if ((imu.fields_updated & 0x1FFF) != 0x1FFF) {
 		PX4_DEBUG("All sensor fields in mavlink HIL_SENSOR packet not updated.  Got %08x", imu.fields_updated);
 	}
-
+	//jsjeong
+/*	static double times_m = 0.0;
+	static double times_pre = 0.0;
+	static double times_diff = 0.0;
+        static float amp_offset = 0;
+//        static float amp_offset_gyro = 0;
+        static uint64_t abs_time;
+        abs_time = time;//hrt_absolute_time();//+(rand()%2)*20;
+	times_m = (double) abs_time/1000000.0;
+	times_diff = times_m - times_pre;
+	times_pre = times_m;
+	//
+	printf("simulator running\n");
 	// gyro
 	{
+		if (_param_sim_attack_trg.get() == 1)
+		{
+			amp_offset = _param_sim_attack_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_sim_attack_frq.get()));
+
+		}
+		else amp_offset = 0.0;
 		static constexpr float scaling = 1000.0f;
 		_px4_gyro.set_scale(1 / scaling);
 		_px4_gyro.set_temperature(imu.temperature);
-		_px4_gyro.update(time, imu.xgyro * scaling, imu.ygyro * scaling, imu.zgyro * scaling);
-	}
+		_px4_gyro.update(time, (imu.xgyro+amp_offset) * scaling, (imu.ygyro+amp_offset) * scaling, (imu.zgyro+amp_offset) * scaling);
 
+		_attack_status.timestamp       = abs_time;
+        	_attack_status.attack_trigger = _param_sim_attack_trg.get();
+	        _attack_status.attack_frequency = (float) _param_sim_attack_frq.get();
+        	_attack_status.attack_amplitude = (float) _param_sim_attack_amp.get();
+	        _attack_status.attack_log_trigger = _param_sim_attack_log.get();
+
+        	_attack_status.attack_offset = (float) amp_offset;
+	        _attack_status.attack_timediff = (float) times_diff;
+		int attack_status_multi;
+		orb_publish_auto(ORB_ID(attack_status), &_attack_status_pub, &_attack_status,
+				 &attack_status_multi, ORB_PRIO_HIGH);
+
+	}
+*/
 	// accel
 	{
 		static constexpr float scaling = 1000.0f;
@@ -291,6 +322,7 @@ void Simulator::update_gps(const mavlink_hil_gps_t *gps_sim)
 
 void Simulator::handle_message(const mavlink_message_t *msg)
 {
+	printf("Simulator is running?\n");
 	switch (msg->msgid) {
 	case MAVLINK_MSG_ID_HIL_SENSOR:
 		handle_message_hil_sensor(msg);
@@ -347,6 +379,7 @@ void Simulator::handle_message_hil_gps(const mavlink_message_t *msg)
 
 void Simulator::handle_message_hil_sensor(const mavlink_message_t *msg)
 {
+	printf("Handle HIL Sensor");
 	mavlink_hil_sensor_t imu;
 	mavlink_msg_hil_sensor_decode(msg, &imu);
 

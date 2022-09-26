@@ -647,6 +647,8 @@ MPU6000::start()
 	_call_interval = last_call_interval;
 
 	ScheduleOnInterval(_call_interval - MPU6000_TIMER_REDUCTION, 1000);
+//	ScheduleOnInterval(1000, 1000);
+
 }
 
 void
@@ -890,6 +892,18 @@ MPU6000::measure()
 
 	/* stop measuring */
 	perf_end(_sample_perf);
+
+//	static uint64_t prev_time = 0;
+//	_mpu6000_time.timestamp = timestamp_sample;
+//	_mpu6000_time.time_log	= timestamp_sample-prev_time;
+//	prev_time = timestamp_sample;
+//
+//	int mpu6000_time_multi;
+//	orb_publish_auto(ORB_ID(mpu6000_time), &_mpu6000_time_pub, &_mpu6000_time,
+//				 &mpu6000_time_multi, ORB_PRIO_HIGH);
+
+
+
 	return OK;
 }
 

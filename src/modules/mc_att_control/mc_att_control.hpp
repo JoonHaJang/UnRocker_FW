@@ -59,6 +59,9 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/landing_gear.h>
+#include <uORB/topics/timelog_mc_att_control.h>
+#include <uORB/topics/sensor_true.h>
+
 #include <vtol_att_control/vtol_type.h>
 
 #include <AttitudeControl.hpp>
@@ -139,8 +142,10 @@ private:
 	 * Throttle PID attenuation.
 	 */
 	matrix::Vector3f pid_attenuations(float tpa_breakpoint, float tpa_rate);
+        timelog_mc_att_control_s _t_mc_att_control {};//jsjeong
 
 	AttitudeControl _attitude_control; /**< class for attitude control calculations */
+        uORB::Publication<timelog_mc_att_control_s>	        _t_mc_att_control_pub{ORB_ID(timelog_mc_att_control)};	/**< combined sensor data topic */
 
 	uORB::Subscription _v_att_sub{ORB_ID(vehicle_attitude)};			/**< vehicle attitude subscription */
 	uORB::Subscription _v_att_sp_sub{ORB_ID(vehicle_attitude_setpoint)};		/**< vehicle attitude setpoint subscription */
@@ -178,6 +183,9 @@ private:
 	struct battery_status_s			_battery_status {};	/**< battery status */
 	struct vehicle_land_detected_s		_vehicle_land_detected {};
 	struct landing_gear_s 			_landing_gear {};
+	sensor_true_s 			_sensor_true {};
+        uORB::Publication<sensor_true_s>	_sensor_true_pub{ORB_ID(sensor_true)};	/**< combined sensor data topic */
+
 
 	MultirotorMixer::saturation_status _saturation_status{};
 

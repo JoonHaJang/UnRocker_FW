@@ -56,6 +56,7 @@
 #include <uORB/topics/sensor_accel.h>
 #include <uORB/topics/sensor_baro.h>
 #include <uORB/topics/attack_status.h>//jsjeong
+#include <uORB/topics/attacc_status.h>//jsjeong
 #include <uORB/topics/sensor_gyro.h>
 #include <uORB/topics/sensor_mag.h>
 #include <uORB/topics/sensor_preflight.h>
