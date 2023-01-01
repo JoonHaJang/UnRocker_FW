@@ -697,18 +697,18 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 	float *offsets[] = {_corrections.gyro_offset_0, _corrections.gyro_offset_1, _corrections.gyro_offset_2 };
 	float *scales[] = {_corrections.gyro_scale_0, _corrections.gyro_scale_1, _corrections.gyro_scale_2 };
 	//jsjeong
+/*
 	static double times_m = 0.0;
 	static double times_pre = 0.0;
 	static double times_diff = 0.0;
         static float amp_offset = 0;
 //        static float amp_offset_gyro = 0;
-        static uint64_t abs_time = 0;
+        static uint64_t abs_time = 0;*/
 /*        abs_time = hrt_absolute_time();//+(rand()%2)*20;
 	times_m = (double) abs_time/1000000.0;
 	times_diff = times_m - times_pre;
 	times_pre = times_m;
 */	//
-
 	for (int uorb_index = 0; uorb_index < _gyro.subscription_count; uorb_index++) {
 		bool gyro_updated;
 		orb_check(_gyro.subscription[uorb_index], &gyro_updated);
@@ -718,7 +718,7 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 
 			int ret = orb_copy(ORB_ID(sensor_gyro), _gyro.subscription[uorb_index], &gyro_report);
 
-			if(uorb_index ==0){
+/*			if(uorb_index ==0){
                 	        abs_time = gyro_report.timestamp;
                         	times_m = (double) abs_time/1000000.0;
 				times_diff = times_m - times_pre;
@@ -728,7 +728,7 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
         			_attack.attack_timediff = (float) times_diff;
         			_attack_pub.publish(_attack);
 			}
-
+*/
 
 			if (ret != PX4_OK || gyro_report.timestamp == 0) {
 				continue; //ignore invalid data

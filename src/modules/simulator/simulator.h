@@ -67,7 +67,8 @@
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_odometry.h>
 #include <uORB/topics/vehicle_status.h>
-#include <uORB/topics/attack_status.h>
+#include <uORB/topics/sitl_gyro_attack.h>
+#include <uORB/topics/sitl_accel_attack.h>
 #include <uORB/uORB.h>
 
 #include <v2.0/common/mavlink.h>
@@ -280,7 +281,8 @@ private:
 	orb_advert_t _gpos_pub{nullptr};
 	orb_advert_t _lpos_pub{nullptr};
 	orb_advert_t _rc_channels_pub{nullptr};
-	orb_advert_t _attack_status_pub{nullptr};
+	orb_advert_t _sitl_gyro_attack_pub{nullptr};
+	orb_advert_t _sitl_accel_attack_pub{nullptr};
 
 	// uORB subscription handlers
 	int _actuator_outputs_sub{-1};
@@ -301,7 +303,8 @@ private:
 	manual_control_setpoint_s _manual {};
 	vehicle_attitude_s _attitude {};
 	vehicle_status_s _vehicle_status {};
-	attack_status_s _attack_status {};
+	sitl_gyro_attack_s _sitl_gyro_attack_status {};
+	sitl_accel_attack_s _sitl_accel_attack_status {};
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::SIM_BAT_DRAIN>) _param_sim_bat_drain, ///< battery drain interval

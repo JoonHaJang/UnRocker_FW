@@ -80,8 +80,8 @@
 #include <uORB/topics/rc_channels.h>
 #include <uORB/topics/sensor_accel.h>
 #include <uORB/topics/sensor_baro.h>
-#include <uORB/topics/attack_status.h>//jsjeong
-#include <uORB/topics/attacc_status.h>//jsjeong
+#include <uORB/topics/hitl_gyro_attack.h>//jsjeong
+#include <uORB/topics/hitl_accel_attack.h>//jsjeong
 #include <uORB/topics/sensor_combined.h>
 #include <uORB/topics/sensor_gyro.h>
 #include <uORB/topics/sensor_mag.h>
@@ -258,8 +258,8 @@ private:
 	uORB::PublicationMulti<radio_status_s>			_radio_status_pub{ORB_ID(radio_status), ORB_PRIO_LOW};
 	uORB::PublicationMulti<sensor_accel_s>			_accel_pub{ORB_ID(sensor_accel), ORB_PRIO_LOW};
 	uORB::PublicationMulti<sensor_baro_s>			_baro_pub{ORB_ID(sensor_baro), ORB_PRIO_LOW};
-	uORB::PublicationMulti<attack_status_s>			_attack_pub{ORB_ID(attack_status), ORB_PRIO_LOW};
-	uORB::PublicationMulti<attacc_status_s>			_attacc_pub{ORB_ID(attacc_status), ORB_PRIO_LOW};
+	uORB::PublicationMulti<hitl_gyro_attack_s>		_attack_gyro_pub{ORB_ID(hitl_gyro_attack), ORB_PRIO_LOW};
+	uORB::PublicationMulti<hitl_accel_attack_s>		_attack_accel_pub{ORB_ID(hitl_accel_attack), ORB_PRIO_LOW};
         uORB::PublicationMulti<sensor_gyro_s>			_gyro_pub{ORB_ID(sensor_gyro), ORB_PRIO_LOW};
 	uORB::PublicationMulti<sensor_mag_s>			_mag_pub{ORB_ID(sensor_mag), ORB_PRIO_LOW};
 
@@ -303,14 +303,14 @@ private:
 		(ParamFloat<px4::params::SENS_FLOW_MAXR>)   _param_sens_flow_maxr,
 		(ParamFloat<px4::params::SENS_FLOW_MINHGT>) _param_sens_flow_minhgt,
 		(ParamInt<px4::params::SENS_FLOW_ROT>)      _param_sens_flow_rot,
-//                (ParamInt<px4::params::ATTACK_TRIGGER>) _param_sim_attack_trg,
-//                (ParamFloat<px4::params::ATTACK_FREQ>) _param_sim_attack_frq,
-//                (ParamFloat<px4::params::ATTACK_AMP>) _param_sim_attack_amp,
-//                (ParamInt<px4::params::ATTACK_GYRLOG>) _param_sim_attack_log,
-//                (ParamInt<px4::params::ATTACC_TRIGGER>) _param_sim_attacc_trg,
-//                (ParamFloat<px4::params::ATTACC_FREQ>) _param_sim_attacc_frq,
-//                (ParamFloat<px4::params::ATTACC_AMP>) _param_sim_attacc_amp,
-//                (ParamInt<px4::params::ATTACC_ACCLOG>) _param_sim_attacc_log,
+                (ParamInt<px4::params::HITL_ATTACK_TRIGGER>) _param_hitl_gyro_attack_trg,
+                (ParamFloat<px4::params::HITL_GYRO_ATTACK_FREQ>) _param_hitl_gyro_attack_frq,
+                (ParamFloat<px4::params::HITL_GRYO_ATTACK_AMP>) _param_hitl_gyro_attack_amp,
+                (ParamInt<px4::params::HITL_GYRO_ATTACK_LOG>) _param_hitl_gyro_attack_log,
+                (ParamInt<px4::params::HITL_ACC_ATTACK_TRIGGER>) _param_hitl_acc_attack_trg,
+                (ParamFloat<px4::params::HITL_ACC_ATTACK_FREQ>) _param_hitl_acc_attack_frq,
+                (ParamFloat<px4::params::HITL_ACC_ATTACK_AMP>) _param_hitl_acc_attack_amp,
+                (ParamInt<px4::params::HITL_ACC_ATTACK_LOG>) _param_hitl_accattack_log,
 		(ParamFloat<px4::params::IMU_GYRO_CUTOFF>) _param_imu_gyro_cutoff,
 		(ParamFloat<px4::params::IMU_ACCEL_CUTOFF>) _param_imu_accel_cutoff
 	

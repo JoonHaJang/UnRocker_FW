@@ -1994,7 +1994,7 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
 	const uint64_t timestamp = hrt_absolute_time();
 
 	//jsjeong
-/*	static double times_m = 0.0;
+	static double times_m = 0.0;
 	static double times_pre = 0.0;
 	static double times_diff = 0.0;
         static float amp_offset = 0;
@@ -2005,11 +2005,11 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
 	times_pre = times_m;
 	//
 
-	attack_status_s _attack_status{};
+	hitl_gyro_attack_s _attack_gyro_status{};
 
-	amp_offset = _param_sim_attack_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_sim_attack_frq.get()));
+	amp_offset = _param_hitl_gyro_attack_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_hitl_gyro_attack_frq.get()));
 
-	if (_param_sim_attack_trg.get() != 0)
+	if (_param_hitl_gyro_attack_trg.get() != 0)
 	{
 		imu.xgyro += amp_offset;
 		imu.ygyro += amp_offset;
@@ -2018,7 +2018,7 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
                 _attack_status.attack_gyro1 = imu.ygyro;
                 _attack_status.attack_gyro2 = imu.zgyro;
         }
-        else if(_param_sim_attack_log.get() != 0)//
+        else if(_param_hitl_gyro_attack_log.get() != 0)//
         {
 		_attack_status.attack_gyro0 = imu.xgyro+amp_offset;
                 _attack_status.attack_gyro1 = imu.ygyro+amp_offset;
@@ -2033,10 +2033,10 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
           }
 
 	_attack_status.timestamp       = abs_time;
-       	_attack_status.attack_trigger = _param_sim_attack_trg.get();
-        _attack_status.attack_frequency = (float) _param_sim_attack_frq.get();
-       	_attack_status.attack_amplitude = (float) _param_sim_attack_amp.get();
-        _attack_status.attack_log_trigger = _param_sim_attack_log.get();
+       	_attack_status.attack_trigger = _param_hitl_gyro_attack_trg.get();
+        _attack_status.attack_frequency = (float) _param_hitl_gyro_attack_frq.get();
+       	_attack_status.attack_amplitude = (float) _param_hitl_gyro_attack_amp.get();
+        _attack_status.attack_log_trigger = _param_hitl_gyro_attack_log.get();
 
        	_attack_status.attack_offset = (float) amp_offset;
         _attack_status.attack_timediff = (float) times_diff;
@@ -2082,7 +2082,7 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
        	_attacc_status.attacc_offset = (float) amp_offset_a;
         _attacc_status.attacc_timediff = (float) times_diff;
 	_attacc_pub.publish(_attacc_status);
-*/
+
 	/* airspeed */
 	{
 		airspeed_s airspeed{};

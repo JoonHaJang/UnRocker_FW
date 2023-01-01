@@ -101,8 +101,10 @@ set(msg_files
 	satellite_info.msg
 	sensor_accel.msg
 	sensor_baro.msg
-        attack_status.msg
-	attacc_status.msg
+        sitl_gyro_attack.msg
+	hitl_gyro_attack.msg
+	sitl_accel_attack.msg
+	hitl_accel_attack.msg
 	mpu6000_time.msg
 	sensor_true.msg
 	timelog_sensor.msg
