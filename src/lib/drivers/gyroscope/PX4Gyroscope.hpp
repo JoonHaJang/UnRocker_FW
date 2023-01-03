@@ -44,12 +44,12 @@
 #include <uORB/PublicationMulti.hpp>
 #include <uORB/topics/sensor_gyro.h>
 #include <uORB/topics/sensor_gyro_control.h>
-//#include <uORB/Publication.hpp>
-//#include <uORB/Subscription.hpp>
+#include <uORB/Publication.hpp>
+#include <uORB/Subscription.hpp>
 
-//#include <uORB/topics/attack_status.h>
-//#include <uORB/topics/attack_cmd.h>
-//#include <uORB/topics/parameter_update.h>
+#include <uORB/topics/sensor_gyro_attack.h>
+#include <uORB/topics/gyro_attack_cmd.h>
+#include <uORB/topics/parameter_update.h>
 
 class PX4Gyroscope : public cdev::CDev, public ModuleParams
 {
@@ -78,8 +78,8 @@ private:
 	uORB::PublicationMultiData<sensor_gyro_s>		_sensor_gyro_pub;
 	uORB::PublicationMultiData<sensor_gyro_control_s>	_sensor_gyro_control_pub;
 
-//	uORB::Publication<attack_status_s> _attack_pub{ORB_ID(attack_status)};//jsjeong
-//	uORB::SubscriptionData<attack_cmd_s> _attack_cmd_sub{ORB_ID(attack_cmd)};//jsjeong
+	uORB::Publication<sensor_gyro_attack_s> _gyro_attack_pub{ORB_ID(sensor_gyro_attack)};//jsjeong
+	uORB::SubscriptionData<gyro_attack_cmd_s> _gyro_attack_cmd_sub{ORB_ID(gyro_attack_cmd)};//jsjeong
 	math::LowPassFilter2pVector3f _filter{1000, 100};
 	Integrator _integrator{4000, true};
 
@@ -92,16 +92,15 @@ private:
 
 	unsigned		_sample_rate{1000};
 
-//        attack_status_s _attack {};//jsjeong
+        sensor_gyro_attack_s _sensor_gyro_attack {};//jsjeong
 //	matrix::Vector3f calibrated_attack{0.0f, 0.0f, 0.0f};
 
 //	const Parameters &_parameters;
 
 	DEFINE_PARAMETERS(
-//		(ParamInt<px4::params::ATTACK_TRIGGER>) _param_attack_trigger,
-
-//		(ParamFloat<px4::params::ATTACK_AMP>) _param_attack_amp,
-//		(ParamFloat<px4::params::ATTACK_FREQ>) _param_attack_freq,
+		(ParamInt<px4::params::SENS_GYRO_TRG>) _param_gyro_attack_trigger,
+		(ParamFloat<px4::params::SENS_GYRO_AMP>) _param_gyro_attack_amp,
+		(ParamFloat<px4::params::SENS_GYRO_FREQ>) _param_gyro_attack_freq,
 		//jsjeong
 		(ParamFloat<px4::params::IMU_GYRO_CUTOFF>) _param_imu_gyro_cutoff,
 		(ParamInt<px4::params::IMU_GYRO_RATEMAX>) _param_imu_gyro_rate_max

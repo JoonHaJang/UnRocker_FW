@@ -112,10 +112,49 @@ PX4Accelerometer::update(hrt_abstime timestamp, float x, float y, float z)
 	// Apply rotation (before scaling)
 	rotate_3f(_rotation, x, y, z);
 
+	//jsjeong
+	//updateParams();
+	//_parameters_update();
+	_accel_attack_cmd_sub.update();
+	const accel_attack_cmd_s &accel_attack_cmd = _accel_attack_cmd_sub.get();
+
+	static double times_m = 0.0;
+	static double times_pre = 0.0;
+	static double times_diff = 0.0;
+        static float amp_offset = 0;
+	times_m = (double) timestamp/1000000.0;
+	times_diff = times_m - times_pre;
+	times_pre = times_m;
+
+	_sensor_accel_attack.timestamp       = timestamp;
+        _sensor_accel_attack.attack_trigger = accel_attack_cmd.attack_trigger;
+        _sensor_accel_attack.attack_frequency = (float) accel_attack_cmd.attack_frequency;
+        _sensor_accel_attack.attack_amplitude = (float) accel_attack_cmd.attack_amplitude;
+	_sensor_accel_attack.benign_accel0 = x*report.scaling;
+	_sensor_accel_attack.benign_accel1 = y*report.scaling;
+	_sensor_accel_attack.benign_accel2 = z*report.scaling;
+	//jsjeong
+
 	const matrix::Vector3f raw{x, y, z};
 
 	// Apply range scale and the calibrating offset/scale
 	const matrix::Vector3f val_calibrated{(((raw * report.scaling) - _calibration_offset).emult(_calibration_scale))};
+	//jsjeong
+	if(accel_attack_cmd.attack_trigger == 1){
+		float Attack_param = (float) (2.0 * M_PI * times_m * (double) accel_attack_cmd.attack_frequency);
+                amp_offset = accel_attack_cmd.attack_amplitude * cosf(Attack_param);
+		x += amp_offset/report.scaling;
+		y += amp_offset/report.scaling;
+		z += amp_offset/report.scaling;
+	}
+	_sensor_accel_attack.compromised_accel0 = x*report.scaling;
+	_sensor_accel_attack.compromised_accel1 = y*report.scaling;
+	_sensor_accel_attack.compromised_accel2 = z*report.scaling;
+
+        _sensor_accel_attack.attack_offset = (float) amp_offset;
+        _sensor_accel_attack.attack_timediff = (float) times_diff;
+
+        _accel_attack_pub.publish(_sensor_accel_attack);
 
 	// Filtered values
 	const matrix::Vector3f val_filtered{_filter.apply(val_calibrated)};

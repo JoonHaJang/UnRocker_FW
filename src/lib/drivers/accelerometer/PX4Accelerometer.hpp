@@ -43,6 +43,12 @@
 #include <uORB/uORB.h>
 #include <uORB/PublicationMulti.hpp>
 #include <uORB/topics/sensor_accel.h>
+#include <uORB/Publication.hpp>
+#include <uORB/Subscription.hpp>
+
+#include <uORB/topics/sensor_accel_attack.h>
+#include <uORB/topics/accel_attack_cmd.h>
+#include <uORB/topics/parameter_update.h>
 
 class PX4Accelerometer : public cdev::CDev, public ModuleParams
 {
@@ -69,6 +75,8 @@ private:
 	void configure_filter(float cutoff_freq) { _filter.set_cutoff_frequency(_sample_rate, cutoff_freq); }
 
 	uORB::PublicationMultiData<sensor_accel_s>	_sensor_accel_pub;
+	uORB::Publication<sensor_accel_attack_s> _accel_attack_pub{ORB_ID(sensor_accel_attack)};//jsjeong
+	uORB::SubscriptionData<accel_attack_cmd_s> _accel_attack_cmd_sub{ORB_ID(accel_attack_cmd)};//jsjeong
 
 	math::LowPassFilter2pVector3f _filter{1000, 100};
 	Integrator _integrator{4000, false};
@@ -82,7 +90,13 @@ private:
 
 	unsigned		_sample_rate{1000};
 
+	sensor_accel_attack_s _sensor_accel_attack {};//jsjeong
+
 	DEFINE_PARAMETERS(
+		(ParamInt<px4::params::SENS_ACCEL_TRG>) _param_accel_attack_trigger,
+		(ParamFloat<px4::params::SENS_ACCEL_AMP>) _param_accel_attack_amp,
+		(ParamFloat<px4::params::SENS_ACCEL_FREQ>) _param_accel_attack_freq,
+		//jsjeong
 		(ParamFloat<px4::params::IMU_ACCEL_CUTOFF>) _param_imu_accel_cutoff
 	)
 

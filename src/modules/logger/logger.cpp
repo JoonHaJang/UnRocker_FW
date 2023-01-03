@@ -555,6 +555,10 @@ void Logger::add_default_topics()
 	add_topic("vtol_vehicle_status", 200);
         add_topic("attack_status");//jsjeong
 	add_topic("attacc_status");//jsjeong
+        add_topic("sensor_gyro_attack");//jsjeong
+	add_topic("sensor_accel_attack");//jsjeong
+        add_topic("sitl_gyro_attack");//jsjeong
+	add_topic("sitl_accel_attack");//jsjeong
 	add_topic("sensor_true");//jsjeong
         add_topic("mpu6000_time");//jsjeong
         add_topic("timelog_sensor");//jsjeong
