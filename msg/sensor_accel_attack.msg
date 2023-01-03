@@ -14,4 +14,3 @@ float32 compromised_accel2
 float32 benign_accel0
 float32 benign_accel1
 float32 benign_accel2
-

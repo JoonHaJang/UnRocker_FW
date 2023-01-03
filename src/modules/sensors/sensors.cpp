@@ -83,7 +83,8 @@
 #include <uORB/topics/differential_pressure.h>
 #include <uORB/topics/airspeed.h>
 #include <uORB/topics/timelog_sensor.h>
-//#include <uORB/topics/attack_cmd.h>
+#include <uORB/topics/gyro_attack_cmd.h>
+#include <uORB/topics/accel_attack_cmd.h>
 #include <uORB/topics/sensor_preflight.h>
 #include <uORB/topics/vehicle_air_data.h>
 #include <uORB/topics/vehicle_magnetometer.h>
@@ -169,7 +170,8 @@ private:
 	bool		_armed{false};				/**< arming status of the vehicle */
 
         timelog_sensor_s _t_sensor {};//jsjeong
-//	attack_cmd_s 	_t_attack_cmd {};//jsjeong
+	gyro_attack_cmd_s 	_t_gyro_attack_cmd {};//jsjeong
+	accel_attack_cmd_s 	_t_accel_attack_cmd {};//jsjeong
 
 	uORB::Subscription	_actuator_ctrl_0_sub{ORB_ID(actuator_controls_0)};		/**< attitude controls sub */
 	uORB::Subscription	_diff_pres_sub{ORB_ID(differential_pressure)};			/**< raw differential pressure subscription */
@@ -183,7 +185,8 @@ private:
 	uORB::Publication<vehicle_magnetometer_s>	_magnetometer_pub{ORB_ID(vehicle_magnetometer)};	/**< combined sensor data topic */
 
         uORB::Publication<timelog_sensor_s>	        _t_sensor_pub{ORB_ID(timelog_sensor)};	/**< combined sensor data topic */
-//	uORB::Publication<attack_cmd_s>	        	_t_attack_cmd_pub{ORB_ID(attack_cmd)};	/** attack_cmd msg */
+	uORB::Publication<gyro_attack_cmd_s>	       	_t_gyro_attack_cmd_pub{ORB_ID(gyro_attack_cmd)};	/** attack_cmd msg */
+	uORB::Publication<accel_attack_cmd_s>	       	_t_accel_attack_cmd_pub{ORB_ID(accel_attack_cmd)};	/** attack_cmd msg */
 
 #if BOARD_NUMBER_BRICKS > 0
 	orb_advert_t	_battery_pub[BOARD_NUMBER_BRICKS] {};			/**< battery status */
@@ -281,23 +284,30 @@ int
 Sensors::parameters_update()
 {
 	//jsjeong
-//	param_get(_parameter_handles.attack_trigger, &(_parameters.attack_trigger));
-//	param_get(_parameter_handles.attack_frequency, &(_parameters.attack_frequency));
-//	param_get(_parameter_handles.attack_amplitude, &(_parameters.attack_amplitude));
-//        param_get(_parameter_handles.attack_log_trigger, &(_parameters.attack_log_trigger));
+	param_get(_parameter_handles.gyro_attack_trigger, &(_parameters.gyro_attack_trigger));
+	param_get(_parameter_handles.gyro_attack_frequency, &(_parameters.gyro_attack_frequency));
+	param_get(_parameter_handles.gyro_attack_amplitude, &(_parameters.gyro_attack_amplitude));
+        param_get(_parameter_handles.gyro_attack_log, &(_parameters.gyro_attack_log));
 
-//	param_get(_parameter_handles.attacc_trigger, &(_parameters.attacc_trigger));
-//	param_get(_parameter_handles.attacc_frequency, &(_parameters.attacc_frequency));
-//	param_get(_parameter_handles.attacc_amplitude, &(_parameters.attacc_amplitude));
-//        param_get(_parameter_handles.attacc_log_trigger, &(_parameters.attacc_log_trigger));
-/*
-	_t_attack_cmd.timestamp = hrt_absolute_time();
-	_t_attack_cmd.attack_trigger = _parameters.attack_trigger;
-	_t_attack_cmd.attack_frequency = _parameters.attack_frequency;
-	_t_attack_cmd.attack_log_trigger = 0;//_parameters.attack_log_trigger;
+	param_get(_parameter_handles.accel_attack_trigger, &(_parameters.accel_attack_trigger));
+	param_get(_parameter_handles.accel_attack_frequency, &(_parameters.accel_attack_frequency));
+	param_get(_parameter_handles.accel_attack_amplitude, &(_parameters.accel_attack_amplitude));
+        param_get(_parameter_handles.accel_attack_log, &(_parameters.accel_attack_log));
 
-	_t_attack_cmd_pub.publish(_t_attack_cmd);
-*/
+	_t_gyro_attack_cmd.timestamp = hrt_absolute_time();
+	_t_gyro_attack_cmd.attack_trigger = _parameters.gyro_attack_trigger;
+	_t_gyro_attack_cmd.attack_frequency = _parameters.gyro_attack_frequency;
+	_t_gyro_attack_cmd.attack_log_trigger = _parameters.gyro_attack_log;
+
+	_t_gyro_attack_cmd_pub.publish(_t_gyro_attack_cmd);
+
+	_t_accel_attack_cmd.timestamp = hrt_absolute_time();
+	_t_accel_attack_cmd.attack_trigger = _parameters.accel_attack_trigger;
+	_t_accel_attack_cmd.attack_frequency = _parameters.accel_attack_frequency;
+	_t_accel_attack_cmd.attack_log_trigger = _parameters.accel_attack_log;
+
+	_t_accel_attack_cmd_pub.publish(_t_accel_attack_cmd);
+
 	if (_armed) {
 		return 0;
 	}

@@ -226,11 +226,11 @@ void Simulator::update_sensors(const hrt_abstime &time, const mavlink_hil_sensor
 		PX4_DEBUG("All sensor fields in mavlink HIL_SENSOR packet not updated.  Got %08x", imu.fields_updated);
 	}
 	//jsjeong
-/*	static double times_m = 0.0;
+	static double times_m = 0.0;
 	static double times_pre = 0.0;
 	static double times_diff = 0.0;
         static float amp_offset = 0;
-//        static float amp_offset_gyro = 0;
+        static float amp_offset_a = 0;
         static uint64_t abs_time;
         abs_time = time;//hrt_absolute_time();//+(rand()%2)*20;
 	times_m = (double) abs_time/1000000.0;
@@ -240,9 +240,9 @@ void Simulator::update_sensors(const hrt_abstime &time, const mavlink_hil_sensor
 	printf("simulator running\n");
 	// gyro
 	{
-		if (_param_sim_attack_trg.get() == 1)
+		if (_param_sitl_gyro_attack_trg.get() == 1)
 		{
-			amp_offset = _param_sim_attack_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_sim_attack_frq.get()));
+			amp_offset = _param_sitl_gyro_attack_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_sitl_gyro_attack_frq.get()));
 
 		}
 		else amp_offset = 0.0;
@@ -251,26 +251,48 @@ void Simulator::update_sensors(const hrt_abstime &time, const mavlink_hil_sensor
 		_px4_gyro.set_temperature(imu.temperature);
 		_px4_gyro.update(time, (imu.xgyro+amp_offset) * scaling, (imu.ygyro+amp_offset) * scaling, (imu.zgyro+amp_offset) * scaling);
 
-		_attack_status.timestamp       = abs_time;
-        	_attack_status.attack_trigger = _param_sim_attack_trg.get();
-	        _attack_status.attack_frequency = (float) _param_sim_attack_frq.get();
-        	_attack_status.attack_amplitude = (float) _param_sim_attack_amp.get();
-	        _attack_status.attack_log_trigger = _param_sim_attack_log.get();
+		_sitl_gyro_attack_status.timestamp       = abs_time;
+        	_sitl_gyro_attack_status.attack_trigger = _param_sitl_gyro_attack_trg.get();
+	        _sitl_gyro_attack_status.attack_frequency = (float) _param_sitl_gyro_attack_frq.get();
+        	_sitl_gyro_attack_status.attack_amplitude = (float) _param_sitl_gyro_attack_amp.get();
+	        _sitl_gyro_attack_status.attack_log_trigger = _param_sitl_gyro_attack_log.get();
 
-        	_attack_status.attack_offset = (float) amp_offset;
-	        _attack_status.attack_timediff = (float) times_diff;
-		int attack_status_multi;
-		orb_publish_auto(ORB_ID(attack_status), &_attack_status_pub, &_attack_status,
-				 &attack_status_multi, ORB_PRIO_HIGH);
+        	_sitl_gyro_attack_status.attack_offset = (float) amp_offset;
+	        _sitl_gyro_attack_status.attack_timediff = (float) times_diff;
+		int sitl_gyro_attack_status_multi;
+		orb_publish_auto(ORB_ID(sitl_gyro_attack), &_sitl_gyro_attack_pub, &_sitl_gyro_attack_status,
+				 &sitl_gyro_attack_status_multi, ORB_PRIO_HIGH);
 
 	}
-*/
+
 	// accel
 	{
+
+		if (_param_sitl_accel_attack_trg.get() == 1)
+		{
+			amp_offset_a = _param_sitl_accel_attack_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_sitl_accel_attack_frq.get()));
+
+		}
+		else amp_offset_a = 0.0;
+
 		static constexpr float scaling = 1000.0f;
 		_px4_accel.set_scale(1 / scaling);
 		_px4_accel.set_temperature(imu.temperature);
-		_px4_accel.update(time, imu.xacc * scaling, imu.yacc * scaling, imu.zacc * scaling);
+		_px4_accel.update(time, (imu.xacc+amp_offset_a) * scaling, (imu.yacc+amp_offset_a) * scaling, (imu.zacc+amp_offset_a) * scaling);
+
+		_sitl_accel_attack_status.timestamp       = abs_time;
+        	_sitl_accel_attack_status.attack_trigger = _param_sitl_accel_attack_trg.get();
+	        _sitl_accel_attack_status.attack_frequency = (float) _param_sitl_accel_attack_frq.get();
+        	_sitl_accel_attack_status.attack_amplitude = (float) _param_sitl_accel_attack_amp.get();
+	        _sitl_accel_attack_status.attack_log_trigger = _param_sitl_accel_attack_log.get();
+
+        	_sitl_accel_attack_status.attack_offset = (float) amp_offset_a;
+	        _sitl_accel_attack_status.attack_timediff = (float) times_diff;
+		int sitl_accel_attack_status_multi;
+		orb_publish_auto(ORB_ID(sitl_accel_attack), &_sitl_accel_attack_pub, &_sitl_accel_attack_status,
+				 &sitl_accel_attack_status_multi, ORB_PRIO_HIGH);
+
+
 	}
 
 	// magnetometer

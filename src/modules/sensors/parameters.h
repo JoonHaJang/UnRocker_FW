@@ -71,15 +71,15 @@ struct Parameters {
 	int32_t board_rotation;
 
 	//jsjeong
-//	int32_t attack_trigger;
-//        int32_t attack_log_trigger;
-//	float 	attack_frequency;
-//	float 	attack_amplitude;
+	int32_t gyro_attack_trigger;
+        int32_t gyro_attack_log;
+	float 	gyro_attack_frequency;
+	float 	gyro_attack_amplitude;
 
-//	int32_t attacc_trigger;
-//        int32_t attacc_log_trigger;
-//	float 	attacc_frequency;
-//	float 	attacc_amplitude;
+	int32_t accel_attack_trigger;
+        int32_t accel_attack_log;
+	float 	accel_attack_frequency;
+	float 	accel_attack_amplitude;
 
 
 	float board_offset[3];
@@ -243,15 +243,15 @@ struct ParameterHandles {
 	param_t board_rotation;
 
 	//jsjeong
-//	param_t attack_trigger;
-//        param_t attack_log_trigger;
-//	param_t attack_frequency;
-//	param_t attack_amplitude;
+	param_t gyro_attack_trigger;
+        param_t gyro_attack_log;
+	param_t gyro_attack_frequency;
+	param_t gyro_attack_amplitude;
 
-//	param_t attacc_trigger;
-//        param_t attacc_log_trigger;
-//	param_t attacc_frequency;
-//	param_t attacc_amplitude;
+	param_t accel_attack_trigger;
+        param_t accel_attack_log;
+	param_t accel_attack_frequency;
+	param_t accel_attack_amplitude;
 
 	param_t board_offset[3];
 

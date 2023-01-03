@@ -152,15 +152,15 @@ void initialize_parameter_handles(ParameterHandles &parameter_handles)
 	parameter_handles.board_rotation = param_find("SENS_BOARD_ROT");
 
 	/* attack trigger, jsjeong */
-//	parameter_handles.attack_trigger = param_find("ATTACK_TRIGGER");
-//	parameter_handles.attack_frequency = param_find("ATTACK_FREQ");
-//	parameter_handles.attack_amplitude = param_find("ATTACK_AMP");
-//        parameter_handles.attack_log_trigger = param_find("ATTACK_GYRLOG");
+	parameter_handles.gyro_attack_trigger = param_find("SENS_GYRO_TRG");
+	parameter_handles.gyro_attack_frequency = param_find("SENS_GYRO_FREQ");
+	parameter_handles.gyro_attack_amplitude = param_find("SENS_GYRO_AMP");
+        parameter_handles.gyro_attack_log = param_find("SENS_GYRO_LOG");
 
-//	parameter_handles.attacc_trigger = param_find("ATTACC_TRIGGER");
-//	parameter_handles.attacc_frequency = param_find("ATTACC_FREQ");
-//	parameter_handles.attacc_amplitude = param_find("ATTACC_AMP");
-//        parameter_handles.attacc_log_trigger = param_find("ATTACC_ACCLOG");
+	parameter_handles.accel_attack_trigger = param_find("SENS_ACCEL_TRG");
+	parameter_handles.accel_attack_frequency = param_find("SENS_ACCEL_FREQ");
+	parameter_handles.accel_attack_amplitude = param_find("SENS_ACCEL_AMP");
+        parameter_handles.accel_attack_log = param_find("SENS_ACCEL_LOG");
 
 
 	/* rotation offsets */
@@ -444,15 +444,15 @@ int update_parameters(const ParameterHandles &parameter_handles, Parameters &par
 	param_get(parameter_handles.board_rotation, &(parameters.board_rotation));
 
 	//jsjeong
-//	param_get(parameter_handles.attack_trigger, &(parameters.attack_trigger));
-//	param_get(parameter_handles.attack_frequency, &(parameters.attack_frequency));
-//	param_get(parameter_handles.attack_amplitude, &(parameters.attack_amplitude));
-//        param_get(parameter_handles.attack_log_trigger, &(parameters.attack_log_trigger));
+	param_get(parameter_handles.gyro_attack_trigger, &(parameters.gyro_attack_trigger));
+	param_get(parameter_handles.gyro_attack_frequency, &(parameters.gyro_attack_frequency));
+	param_get(parameter_handles.gyro_attack_amplitude, &(parameters.gyro_attack_amplitude));
+        param_get(parameter_handles.gyro_attack_log, &(parameters.gyro_attack_log));
 
-//	param_get(parameter_handles.attacc_trigger, &(parameters.attacc_trigger));
-//	param_get(parameter_handles.attacc_frequency, &(parameters.attacc_frequency));
-//	param_get(parameter_handles.attacc_amplitude, &(parameters.attacc_amplitude));
-//        param_get(parameter_handles.attacc_log_trigger, &(parameters.attacc_log_trigger));
+	param_get(parameter_handles.accel_attack_trigger, &(parameters.accel_attack_trigger));
+	param_get(parameter_handles.accel_attack_frequency, &(parameters.accel_attack_frequency));
+	param_get(parameter_handles.accel_attack_amplitude, &(parameters.accel_attack_amplitude));
+        param_get(parameter_handles.accel_attack_log, &(parameters.accel_attack_log));
 
 
 	param_get(parameter_handles.board_offset[0], &(parameters.board_offset[0]));

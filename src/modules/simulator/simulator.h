@@ -312,10 +312,15 @@ private:
 		(ParamInt<px4::params::MAV_TYPE>) _param_mav_type,
 		(ParamInt<px4::params::MAV_SYS_ID>) _param_mav_sys_id,
 		(ParamInt<px4::params::MAV_COMP_ID>) _param_mav_comp_id,
-		(ParamInt<px4::params::ATTACK_TRIGGER>) _param_sim_attack_trg, 
-		(ParamFloat<px4::params::ATTACK_FREQ>) _param_sim_attack_frq,
-		(ParamFloat<px4::params::ATTACK_AMP>) _param_sim_attack_amp,
-		(ParamInt<px4::params::ATTACK_GYRLOG>) _param_sim_attack_log
+		(ParamInt<px4::params::SITL_GYRO_TRG>) _param_sitl_gyro_attack_trg, 
+		(ParamFloat<px4::params::SITL_GYRO_FREQ>) _param_sitl_gyro_attack_frq,
+		(ParamFloat<px4::params::SITL_GYRO_AMP>) _param_sitl_gyro_attack_amp,
+		(ParamInt<px4::params::SITL_GYRO_LOG>) _param_sitl_gyro_attack_log,
+		(ParamInt<px4::params::SITL_ACCEL_TRG>) _param_sitl_accel_attack_trg, 
+		(ParamFloat<px4::params::SITL_ACCEL_FREQ>) _param_sitl_accel_attack_frq,
+		(ParamFloat<px4::params::SITL_ACCEL_AMP>) _param_sitl_accel_attack_amp,
+		(ParamInt<px4::params::SITL_ACCEL_LOG>) _param_sitl_accel_attack_log
+
 
 	)
 

@@ -2005,7 +2005,7 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
 	times_pre = times_m;
 	//
 
-	hitl_gyro_attack_s _attack_gyro_status{};
+	attack_status_s _attack_status{};
 
 	amp_offset = _param_hitl_gyro_attack_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_hitl_gyro_attack_frq.get()));
 
@@ -2041,14 +2041,14 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
        	_attack_status.attack_offset = (float) amp_offset;
         _attack_status.attack_timediff = (float) times_diff;
 
-	_attack_pub.publish(_attack_status);
+	_attack_gyro_pub.publish(_attack_status);
 
 	static float amp_offset_a = 0;
 	
-	amp_offset_a = _param_sim_attacc_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_sim_attacc_frq.get()));
+	amp_offset_a = _param_hitl_acc_attack_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_hitl_acc_attack_frq.get()));
 	attacc_status_s _attacc_status{};
 
-	if (_param_sim_attacc_trg.get() != 0)
+	if (_param_hitl_acc_attack_trg.get() != 0)
 	{
 		imu.xacc += amp_offset_a;
 		imu.yacc += amp_offset_a;
@@ -2059,7 +2059,7 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
                 _attacc_status.attacc_accel2 = imu.zacc;
 
         }
-        else if(_param_sim_attacc_log.get() != 0)//
+        else if(_param_hitl_acc_attack_log.get() != 0)//
         {
 		_attacc_status.attacc_accel0 = imu.xacc+amp_offset_a;
                 _attacc_status.attacc_accel1 = imu.yacc+amp_offset_a;
@@ -2074,14 +2074,14 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
         }
 
 	_attacc_status.timestamp       = abs_time;
-	_attacc_status.attacc_trigger = _param_sim_attacc_trg.get();
-	_attacc_status.attacc_frequency = (float) _param_sim_attacc_frq.get();
-        _attacc_status.attacc_amplitude = (float) _param_sim_attacc_amp.get();
-	_attacc_status.attacc_log_trigger = _param_sim_attacc_log.get();
+	_attacc_status.attacc_trigger = _param_hitl_acc_attack_trg.get();
+	_attacc_status.attacc_frequency = (float) _param_hitl_acc_attack_frq.get();
+        _attacc_status.attacc_amplitude = (float) _param_hitl_acc_attack_amp.get();
+	_attacc_status.attacc_log_trigger = _param_hitl_acc_attack_log.get();
 
        	_attacc_status.attacc_offset = (float) amp_offset_a;
         _attacc_status.attacc_timediff = (float) times_diff;
-	_attacc_pub.publish(_attacc_status);
+	_attack_accel_pub.publish(_attacc_status);
 
 	/* airspeed */
 	{
