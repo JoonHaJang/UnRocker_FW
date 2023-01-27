@@ -1,0 +1,1 @@
+Crashed at GYRO AMP: 0.500000, FREQ: 0

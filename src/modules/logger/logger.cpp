@@ -48,7 +48,6 @@
 #include <uORB/uORBTopics.h>
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/vehicle_command_ack.h>
-//#include <uORB/topics/sensor_true.h>
 #include <uORB/topics/mpu6000_time.h>
 
 
@@ -553,12 +552,12 @@ void Logger::add_default_topics()
 	add_topic("vehicle_status", 200);
 	add_topic("vehicle_status_flags");
 	add_topic("vtol_vehicle_status", 200);
-        add_topic("attack_status");//jsjeong
-	add_topic("attacc_status");//jsjeong
         add_topic("sensor_gyro_attack");//jsjeong
 	add_topic("sensor_accel_attack");//jsjeong
         add_topic("sitl_gyro_attack");//jsjeong
 	add_topic("sitl_accel_attack");//jsjeong
+        add_topic("hitl_gyro_attack");//jsjeong
+	add_topic("hitl_accel_attack");//jsjeong
 	add_topic("sensor_true");//jsjeong
         add_topic("mpu6000_time");//jsjeong
         add_topic("timelog_sensor");//jsjeong
@@ -567,7 +566,6 @@ void Logger::add_default_topics()
         add_topic("timelog_mc_pos_constrol",200);//jsjeong
         add_topic("timelog_ekf2",200);//jsjeong
         add_topic("timelog_mc_att_control",200);//jsjeong
-//        add_topic("timelog_logger",5);//jsjeong
 
 	add_topic_multi("actuator_outputs", 100);
 	add_topic_multi("battery_status", 500);

@@ -1,0 +1,2 @@
+Crashed at AMP: 0.500000, FREQ: 0
+Not crashed at AMP: 0.500000, FREQ: 5

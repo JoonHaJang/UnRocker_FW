@@ -7,7 +7,11 @@ float32 attack_amplitude
 float32 attack_offset
 float32 attack_timediff
 
-float32 attack_gyro0
-float32 attack_gyro1
-float32 attack_gyro2
+float32 compromised_gyro0
+float32 compromised_gyro1
+float32 compromised_gyro2
+
+float32 benign_gyro0
+float32 benign_gyro1
+float32 benign_gyro2
 

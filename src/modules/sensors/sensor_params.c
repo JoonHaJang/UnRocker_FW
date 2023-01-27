@@ -180,59 +180,60 @@ PARAM_DEFINE_INT32(SENS_BOARD_ROT, 0);
  */
 
 
+
 PARAM_DEFINE_INT32(SENS_GYRO_TRG, 0);
 
 /**
- * jsjeong, attack_trigger
+ * jsjeong, gyro_attack_trigger
  * default 0
  */
 
 PARAM_DEFINE_FLOAT(SENS_GYRO_FREQ, 0.0f);
 
 /**
- * jsjeong, attack_frequency
+ * jsjeong, gyro_attack_frequency
  * default 0.0f
  */
 
 PARAM_DEFINE_FLOAT(SENS_GYRO_AMP, 0.0f);
 
 /**
- * jsjeong, attack_amplitude
+ * jsjeong, gyro_attack_amplitude
  * default 0.0f
  */
 
 PARAM_DEFINE_INT32(SENS_GYRO_LOG, 0);
 
 /**
- * jsjeong, attack_log_trigger
+ * jsjeong, gyro_attack_log_trigger
  * default 0
  */
 
 PARAM_DEFINE_INT32(SENS_ACCEL_TRG, 0);
 
 /**
- * jsjeong, attacc_trigger
+ * jsjeong, accel_attack_trigger
  * default 0
  */
 
 PARAM_DEFINE_FLOAT(SENS_ACCEL_FREQ, 0.0f);
 
 /**
- * jsjeong, attacc_frequency
+ * jsjeong, accel_attack_frequency
  * default 0.0f
  */
 
 PARAM_DEFINE_FLOAT(SENS_ACCEL_AMP, 0.0f);
 
 /**
- * jsjeong, attacc_amplitude
+ * jsjeong, accel_attack_amplitude
  * default 0.0f
  */
 
 PARAM_DEFINE_INT32(SENS_ACCEL_LOG, 0);
 
 /**
- * jsjeong, attacc_log_trigger
+ * jsjeong, accel_attack_log_trigger
  * default 0
  */
 
