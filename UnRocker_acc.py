@@ -79,63 +79,6 @@ else:
 
         return False
 
-
-def run_iteration():
-    res = subprocess.Popen("make px4_sitl gazebo_solo",shell=True)
-    time.sleep(10)
-    
-
-    # Connect to the Vehicle
-    print "Connecting"
-    connection_string = '127.0.0.1:14540'
-    vehicle = connect(connection_string, wait_ready=True)
-    ################################################################################################
-    # Listeners
-    ################################################################################################
-
-    home_position_set = False
-
-    #Create a message listener for home position fix
-    @vehicle.on_message('HOME_POSITION')
-    def listener(self, name, home_position):
-        global home_position_set
-        home_position_set = True
-
-    while not home_position_set:
-        print "Waiting for home position..."
-        time.sleep(1)
-
-    # Display basic vehicle state
-    print " Type: %s" % vehicle._vehicle_type
-    print " Armed: %s" % vehicle.armed
-    print " System status: %s" % vehicle.system_status.state
-    print " GPS: %s" % vehicle.gps_0
-    print " Alt: %s" % vehicle.location.global_relative_frame.alt
-
-    time.sleep(3)
-    
-    
-    cmds = vehicle.commands
-    cmds.clear()
-    
-        
-    # Change to AUTO mode
-    PX4setMode(MAV_MODE_AUTO)
-    time.sleep(1)
-
-    vehicle.armed= True
-    home = vehicle.location.global_relative_frame
-    parm_name = 'SITL_ACCEL_TRG'
-    time.sleep(5)
-
-    vehicle.parameters['sitl_accel_trg'] = 1.0
-    print "attack : %s" %vehicle.parameters['sitl_accel_trg']
-    
-    time.sleep(5)
-    vehicle.parameters['sitl_accel_trg'] = 0
-    print "attack : %s" %vehicle.parameters['sitl_accel_trg']
-
-    time.sleep(300)
  
 def fly_unrocker():
 
@@ -219,50 +162,6 @@ def fly_unrocker():
             break
     out.close()
     self.progress("RVFuzzer test is done.")
-
-def start_MAVProxy_SITL(master='udp:127.0.0.1:14550'):
-    """Launch mavproxy connected to a SITL instance."""
-    import pexpect
-    #global close_list
-    MAVPROXY = os.getenv('MAVPROXY_CMD', 'mavproxy.py')
-    cmd = MAVPROXY + ' --master=%s --out=127.0.0.1:18570' % master
-    ret = pexpect.spawn("mavproxy.py --master=udp:127.0.0.1:14550 --out=127.0.0.1:1857", encoding=ENCODING, timeout=60)
-    ret.delaybeforesend = 0
-    return ret
-
-
-def tests(self):
-    return [
-        ("Iterative Test",
-             "Test Fly UnRocker Tests (takeoff)",
-         self.fly_unrocker),
-    ]
-
-def fly_test(mavproxy):
-    print("test")
-    mavproxy.send('commander takeoff\n')
-
-
-def get_location_offset_meters(original_location, dNorth, dEast, alt):
-    """
-    Returns a LocationGlobal object containing the latitude/longitude `dNorth` and `dEast` metres from the
-    specified `original_location`. The returned Location adds the entered `alt` value to the altitude of the `original_location`.
-    The function is useful when you want to move the vehicle around specifying locations relative to
-    the current vehicle position.
-    The algorithm is relatively accurate over small distances (10m within 1km) except close to the poles.
-    For more information see:
-    http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
-    """
-    earth_radius=6378137.0 #Radius of "spherical" earth
-    #Coordinate offsets in radians
-    dLat = dNorth/earth_radius
-    dLon = dEast/(earth_radius*math.cos(math.pi*original_location.lat/180))
-
-    #New position in decimal degrees
-    newlat = original_location.lat + (dLat * 180/math.pi)
-    newlon = original_location.lon + (dLon * 180/math.pi)
-    return LocationGlobal(newlat, newlon,original_location.alt+alt)
-
 
 
 if __name__ == "__main__":

@@ -42,23 +42,23 @@ else:
     # This function is based on wait_wapoint in common.py
     def check_roundtrip(vehicle,
                         timeout=600):
-        tstart = time.time()#self.get_sim_time()
+        tstart = time.time()
         # this message arrives after we set the current WP
-        start_wp = vehicle.commands.next#_master.mav.waypoint_current()
+        start_wp = vehicle.commands.next
         current_wp = start_wp
-        mode = vehicle.mode#_master.mav.flightmode
+        mode = vehicle.mode
         last_wp_msg = 0
 	roundtrip_start = False
 	roundtrip_check = False
         while time.time() < tstart + timeout:
-            seq = vehicle.commands.next#self.mav.waypoint_current()
+            seq = vehicle.commands.next
             if time.time() - last_wp_msg > 1:
-                last_wp_msg = time.time()#self.get_sim_time_cached()
-            if seq == current_wp+1: #or (seq > current_wp+1 and allow_skip):
+                last_wp_msg = time.time()
+            if seq == current_wp+1: 
                 print("test: Starting new waypoint %u" % seq)
-                tstart = time.time()#self.get_sim_time()
+                tstart = time.time()
                 current_wp = seq
-            if current_wp == 7:#wpnum_end and wp_dist < max_dist:
+            if current_wp == 7:
                 print("Reached final waypoint %u" % seq)
                 return False
             if seq >= 255:
@@ -126,7 +126,7 @@ def fly_unrocker():
         time.sleep(2)
 
         sub_count = sub_count + 1
-        if sub_count == 5:
+        if sub_count == 6:
             sub_count = 0
             attack_amp = attack_amp + 1.0
         if attack_amp > 4.5:
@@ -134,50 +134,6 @@ def fly_unrocker():
 
    
     self.progress("UnRocker test is done.")
-
-def start_MAVProxy_SITL(master='udp:127.0.0.1:14550'):#:5760'):##udp
-    """Launch mavproxy connected to a SITL instance."""
-    import pexpect
-    #global close_list
-    MAVPROXY = os.getenv('MAVPROXY_CMD', 'mavproxy.py')
-    cmd = MAVPROXY + ' --master=%s --out=127.0.0.1:18570' % master##14540
-    ret = pexpect.spawn("mavproxy.py --master=udp:127.0.0.1:14550 --out=127.0.0.1:1857", encoding=ENCODING, timeout=60)#cmd, encoding=ENCODING, timeout=60)
-    ret.delaybeforesend = 0
-    return ret
-
-
-def tests(self):
-    return [
-        ("UnRocker Dataset Generator",
-             "Generate UnRocker Dataset (takeoff)",
-         self.fly_unrocker),
-    ]
-
-def fly_test(mavproxy):
-    print("test")
-    mavproxy.send('commander takeoff\n')
-
-def get_location_offset_meters(original_location, dNorth, dEast, alt):
-    """
-    Returns a LocationGlobal object containing the latitude/longitude `dNorth` and `dEast` metres from the
-    specified `original_location`. The returned Location adds the entered `alt` value to the altitude of the `original_location`.
-    The function is useful when you want to move the vehicle around specifying locations relative to
-    the current vehicle position.
-    The algorithm is relatively accurate over small distances (10m within 1km) except close to the poles.
-    For more information see:
-    http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
-    """
-    earth_radius=6378137.0 #Radius of "spherical" earth
-    #Coordinate offsets in radians
-    dLat = dNorth/earth_radius
-    dLon = dEast/(earth_radius*math.cos(math.pi*original_location.lat/180))
-
-    #New position in decimal degrees
-    newlat = original_location.lat + (dLat * 180/math.pi)
-    newlon = original_location.lon + (dLon * 180/math.pi)
-    return LocationGlobal(newlat, newlon,original_location.alt+alt)
-
-
 
 if __name__ == "__main__":
 
