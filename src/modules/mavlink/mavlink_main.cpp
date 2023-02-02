@@ -1689,6 +1689,8 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 		configure_stream_local("VFR_HUD", 10.0f);
 		configure_stream_local("WIND_COV", 10.0f);
 		configure_stream_local("BATTERY_STATUS", 0.5f);
+		configure_stream_local("DNN_SEND", 400.0f);//jsjeong
+
 		break;
 
 	case MAVLINK_MODE_EXTVISION:
@@ -1756,6 +1758,7 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 
 	/* fallthrough */
 	case MAVLINK_MODE_CUSTOM:
+		configure_stream_local("DNN_SEND", 20.0f);//jsjeong
 		//stream nothing
 		break;
 
@@ -1803,6 +1806,8 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 		configure_stream_local("VFR_HUD", 20.0f);
 		configure_stream_local("WIND_COV", 10.0f);
 		configure_stream_local("BATTERY_STATUS", 0.5f);
+		configure_stream_local("DNN_SEND", 400.0f);//jsjeong
+
 		break;
 
 	case MAVLINK_MODE_IRIDIUM:

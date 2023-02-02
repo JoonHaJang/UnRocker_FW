@@ -69,10 +69,12 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/sitl_gyro_attack.h>
 #include <uORB/topics/sitl_accel_attack.h>
+#include <uORB/topics/dnn_send.h>
 #include <uORB/uORB.h>
 
 #include <v2.0/common/mavlink.h>
-#include <v2.0/mavlink_types.h>
+//#include <v2.0/mavlink_types.h>
+#include <v2.0/custom_messages/mavlink.h>
 
 namespace simulator
 {

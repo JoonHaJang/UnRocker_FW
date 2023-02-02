@@ -82,6 +82,7 @@
 #include <uORB/topics/sensor_baro.h>
 #include <uORB/topics/hitl_gyro_attack.h>//jsjeong
 #include <uORB/topics/hitl_accel_attack.h>//jsjeong
+#include <uORB/topics/dnn_recv.h>
 #include <uORB/topics/sensor_combined.h>
 #include <uORB/topics/sensor_gyro.h>
 #include <uORB/topics/sensor_mag.h>
@@ -101,6 +102,7 @@
 #include <uORB/topics/vehicle_rates_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_trajectory_waypoint.h>
+#include <v2.0/custom_messages/mavlink_msg_dnn_recv.h>
 
 using matrix::Vector3f;
 
@@ -171,6 +173,7 @@ private:
 	void handle_message_trajectory_representation_waypoints(mavlink_message_t *msg);
 	void handle_message_utm_global_position(mavlink_message_t *msg);
 	void handle_message_vision_position_estimate(mavlink_message_t *msg);
+	void handle_message_dnn_recv(mavlink_message_t *msg);
 
 
 	void Run();
@@ -262,6 +265,7 @@ private:
 	uORB::PublicationMulti<hitl_accel_attack_s>		_hitl_accel_attack_pub{ORB_ID(hitl_accel_attack), ORB_PRIO_LOW};
         uORB::PublicationMulti<sensor_gyro_s>			_gyro_pub{ORB_ID(sensor_gyro), ORB_PRIO_LOW};
 	uORB::PublicationMulti<sensor_mag_s>			_mag_pub{ORB_ID(sensor_mag), ORB_PRIO_LOW};
+	uORB::PublicationMulti<dnn_recv_s>			_dnn_recv_msg_pub{ORB_ID(dnn_recv), ORB_PRIO_LOW};//jsjeong
 
 	// ORB publications (queue length > 1)
 	uORB::PublicationQueued<gps_inject_data_s>	_gps_inject_data_pub{ORB_ID(gps_inject_data)};

@@ -108,6 +108,8 @@ set(msg_files
 	sensor_gyro_attack.msg
 	sitl_accel_attack.msg
 	hitl_accel_attack.msg
+	dnn_recv.msg
+	dnn_send.msg
 	sensor_accel_attack.msg
 	mpu6000_time.msg
 	sensor_true.msg

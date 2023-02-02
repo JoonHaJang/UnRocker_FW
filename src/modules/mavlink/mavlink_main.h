@@ -76,6 +76,7 @@
 #include <uORB/topics/mission_result.h>
 #include <uORB/topics/radio_status.h>
 #include <uORB/topics/telemetry_status.h>
+#include <uORB/topics/dnn_send.h>
 
 #include "mavlink_command_sender.h"
 #include "mavlink_messages.h"

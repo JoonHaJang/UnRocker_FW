@@ -244,6 +244,9 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 	case MAVLINK_MSG_ID_DEBUG_FLOAT_ARRAY:
 		handle_message_debug_float_array(msg);
 		break;
+	case MAVLINK_MSG_ID_DNN_RECV:
+		handle_message_dnn_recv(msg);
+		break;
 
 	default:
 		break;
@@ -2615,6 +2618,20 @@ MavlinkReceiver::handle_message_debug_float_array(mavlink_message_t *msg)
 	}
 
 	_debug_array_pub.publish(debug_topic);
+}
+
+void
+MavlinkReceiver::handle_message_dnn_recv(mavlink_message_t *msg)
+{
+	mavlink_dnn_recv_t dnn_recv_msg;
+	mavlink_msg_dnn_recv_decode(msg, &dnn_recv_msg);
+	
+	dnn_recv_s f{};
+	
+	f.timestamp = hrt_absolute_time();
+	f.recovered_signal = dnn_recv_msg.recovered_signal;
+	//f.timestamp_send = dnn_recv_msg.timestamp_send;
+        _dnn_recv_msg_pub.publish(f);
 }
 
 /**
