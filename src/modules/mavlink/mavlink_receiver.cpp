@@ -2630,7 +2630,7 @@ MavlinkReceiver::handle_message_dnn_recv(mavlink_message_t *msg)
 	
 	f.timestamp = hrt_absolute_time();
 	f.recovered_signal = dnn_recv_msg.recovered_signal;
-	//f.timestamp_send = dnn_recv_msg.timestamp_send;
+	f.timestamp_send = dnn_recv_msg.timestamp_send;
         _dnn_recv_msg_pub.publish(f);
 }
 

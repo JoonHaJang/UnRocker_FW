@@ -111,6 +111,11 @@
 #include <uORB/uORB.h>
 #include <uORB/topics/dnn_send.h>
 #include <uORB/topics/dnn_recv.h>
+#include <v2.0/custom_messages/mavlink.h>
+//#include <v2.0/common/mavlink.h>
+#include <v2.0/custom_messages/mavlink_msg_dnn_send.h>
+#include <v2.0/custom_messages/mavlink_msg_dnn_recv.h>
+
 using matrix::wrap_2pi;
 
 static uint16_t cm_uint16_from_m_float(float m);
@@ -5045,6 +5050,73 @@ protected:
 	}
 };
 
+//jsjeong
+
+class MavlinkStreamDnnSend : public MavlinkStream
+{
+public:
+    const char *get_name() const
+    {
+        return MavlinkStreamDnnSend::get_name_static();
+    }
+    static const char *get_name_static()
+    {
+        return "DNN_SEND";
+    }
+    static uint16_t get_id_static()
+    {
+        return MAVLINK_MSG_ID_DNN_SEND;
+    }
+    uint16_t get_id()
+    {
+        return get_id_static();
+    }
+    static MavlinkStream *new_instance(Mavlink *mavlink)
+    {
+        return new MavlinkStreamDnnSend(mavlink);
+    }
+    unsigned get_size()
+    {
+        return MAVLINK_MSG_ID_DNN_SEND_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES;
+    }
+
+private:
+    MavlinkOrbSubscription *_dnn_send_sub;
+    uint64_t _dnn_send_time;
+
+    /* do not allow top copying this class */
+    MavlinkStreamDnnSend(MavlinkStreamDnnSend &) = delete;
+    MavlinkStreamDnnSend &operator = (const MavlinkStreamDnnSend &) = delete;
+
+protected:
+    explicit MavlinkStreamDnnSend(Mavlink *mavlink) : MavlinkStream(mavlink),
+        _dnn_send_sub(_mavlink->add_orb_subscription(ORB_ID(dnn_send))), 
+        _dnn_send_time(0)
+    {}
+
+    bool send(const hrt_abstime t)
+    {
+        dnn_send_s dnn_send;// = {};    
+
+        if (_dnn_send_sub->update(&_dnn_send_time, &dnn_send)) {
+            mavlink_dnn_send_t msg = {}; 
+
+
+	    msg.time_usec = dnn_send.timestamp;
+            msg.attack_trigger = dnn_send.attack_trigger;
+            msg.compromised_signal  = dnn_send.compromised_signal;
+	   // printf("DNN send msg %d %f %f\n",msg.time_usec, (double)msg.compromised_signal, (double)dnn_send.compromised_signal);//jsjeong
+	   
+
+            mavlink_msg_dnn_send_send_struct(_mavlink->get_channel(), &msg);
+	    return true;
+        }
+
+        return false;
+    }
+};
+
+//
 
 static const StreamListItem streams_list[] = {
 	StreamListItem(&MavlinkStreamHeartbeat::new_instance, &MavlinkStreamHeartbeat::get_name_static, &MavlinkStreamHeartbeat::get_id_static),
@@ -5106,7 +5178,7 @@ static const StreamListItem streams_list[] = {
 	StreamListItem(&MavlinkStreamPing::new_instance, &MavlinkStreamPing::get_name_static, &MavlinkStreamPing::get_id_static),
 	StreamListItem(&MavlinkStreamOrbitStatus::new_instance, &MavlinkStreamOrbitStatus::get_name_static, &MavlinkStreamOrbitStatus::get_id_static),
 	StreamListItem(&MavlinkStreamObstacleDistance::new_instance, &MavlinkStreamObstacleDistance::get_name_static, &MavlinkStreamObstacleDistance::get_id_static),
-	
+	StreamListItem(&MavlinkStreamDnnSend::new_instance, &MavlinkStreamDnnSend::get_name_static, &MavlinkStreamDnnSend::get_id_static),
 };
 
 const char *get_stream_name(const uint16_t msg_id)
