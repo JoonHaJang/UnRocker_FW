@@ -48,8 +48,10 @@
 #include <pthread.h>
 #include <conversion/rotation.h>
 #include <mathlib/mathlib.h>
-
+#include "lookup_table.hpp"
 #include <limits>
+#include <random>
+#include <ctime>
 
 #ifdef ENABLE_UART_RC_INPUT
 #ifndef B460800
@@ -74,6 +76,44 @@ const unsigned mode_flag_custom = 1;
 
 using namespace simulator;
 using namespace time_literals;
+
+LookupTable gyro_x;
+LookupTable gyro_y;
+LookupTable gyro_z;
+LookupTable accel_x;
+LookupTable accel_y;
+LookupTable accel_z;
+LookupTable mag_x;
+LookupTable mag_y;
+LookupTable mag_z;
+static int defense_window = 0;
+static int idx = 0;
+//static int off = 0;
+
+float random_float() {
+    static bool initialized = false;
+
+    // Seed the random number generator only once
+    if (!initialized) {
+        srand(time(NULL));
+        initialized = true;
+    }
+
+    // Generate a random integer between 0 and RAND_MAX
+    int rand_int = rand();
+
+    // Map the integer to a float between 200 and -200
+    float rand_float = (float)rand_int / (float)RAND_MAX;  // Between 0 and 1
+    //rand_float = rand_float * 600.0f - 300.0f;  // Between -200 and 200
+    rand_float = rand_float * 200.0f - 100.0f;  // Between -200 and 200
+
+    return rand_float;
+}
+
+
+
+
+//static int off = 0;
 
 mavlink_hil_actuator_controls_t Simulator::actuator_controls_from_outputs(const actuator_outputs_s &actuators)
 {
@@ -356,101 +396,221 @@ void Simulator::handle_message_hil_sensor(const mavlink_message_t *msg)
 	px4_clock_settime(CLOCK_MONOTONIC, &ts);
 
 	hrt_abstime now_us = hrt_absolute_time();
-	//jsjeong
 	static double times_m = 0.0;
 	static double times_pre = 0.0;
 	static double times_diff = 0.0;
-        static float amp_offset = 0;
         static uint64_t abs_time;
         abs_time = now_us;
+	//time for sampling period
 	times_m = (double) abs_time/1000000.0;
 	times_diff = times_m - times_pre;
 	times_pre = times_m;
 
-	amp_offset = _param_sitl_gyro_attack_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_sitl_gyro_attack_frq.get()));
-	_sitl_gyro_attack_status.benign_gyro0 = imu.xgyro;
-	_sitl_gyro_attack_status.benign_gyro1 = imu.ygyro;
-	_sitl_gyro_attack_status.benign_gyro2 = imu.zgyro;
-	if (_param_sitl_gyro_attack_trg.get() != 0)
+	//variable for amplication
+	static float amp_g = 0;
+	static float amp_a = 0;
+	static float amp_m = 0;
+
+	//for recovery
+
+	//LookupTable gyro_x;
+	//LookupTable gyro_y;
+	//LookupTable gyro_z;
+//
+	//LookupTable accel_x;
+	//LookupTable accel_y;
+	//LookupTable accel_z;
+//
+	//LookupTable mag_x;
+	//LookupTable mag_y;
+	//LookupTable mag_z;
+
+	//std::vector<float> re_gyro_x;
+	//std::vector<float> re_gyro_y;
+	//std::vector<float> re_gyro_z;
+//
+	//std::vector<float> re_accel_x;
+	//std::vector<float> re_accel_y;
+	//std::vector<float> re_accel_z;
+//
+	//std::vector<float> re_mag_x;
+	//std::vector<float> re_mag_y;
+	//std::vector<float> re_mag_z;
+
+	float re_gyro_x=0;
+	float re_gyro_y=0;
+	float re_gyro_z=0;
+	float re_accel_x=0;
+	float re_accel_y=0;
+	float re_accel_z=0;
+	float re_mag_x=0;
+	float re_mag_y=0;
+	float re_mag_z=0;
+	static int defense = 0;
+	//amp_g = _param_sitl_emi_gyro_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_sitl_emi_gyro_frq.get()));
+	//amp_g = (float)rand_int / (float)RAND_MAX*400.0f - 200.0f;
+	amp_g = random_float();
+	_sitl_emi_attack_status.benign_gyro0 = imu.xgyro;
+	_sitl_emi_attack_status.benign_gyro1 = imu.ygyro;
+	_sitl_emi_attack_status.benign_gyro2 = imu.zgyro;
+	gyro_x.insert(idx,imu.xgyro);
+	gyro_y.insert(idx,imu.ygyro);
+	gyro_z.insert(idx,imu.zgyro);
+
+
+	//amp_a = (_param_sitl_emi_accel_amp.get()) * cosf((float) (2.0 * M_PI * times_m * (double) _param_sitl_emi_accel_frq.get()));
+	//amp_a = (float)rand_int / (float)RAND_MAX*400.0f - 200.0f;
+	amp_a = random_float();
+
+	_sitl_emi_attack_status.benign_accel0 = imu.xacc;
+	_sitl_emi_attack_status.benign_accel1 = imu.yacc;
+	_sitl_emi_attack_status.benign_accel2 = imu.zacc;
+	accel_x.insert(idx,imu.xacc);
+	accel_y.insert(idx,imu.yacc);
+	accel_z.insert(idx,imu.zacc);
+
+
+	//amp_m = (_param_sitl_emi_mag_amp.get()) * cosf((float) (2.0 * M_PI * times_m * (double) _param_sitl_emi_mag_frq.get()));
+	//amp_m = (float)rand_int / (float)RAND_MAX*400.0f - 200.0f;
+	amp_m = random_float();
+
+	_sitl_emi_attack_status.benign_mag0 = imu.xmag;
+	_sitl_emi_attack_status.benign_mag1 = imu.ymag;
+	_sitl_emi_attack_status.benign_mag2 = imu.zmag;
+	mag_x.insert(idx,imu.xmag);
+	mag_y.insert(idx,imu.ymag);
+	mag_z.insert(idx,imu.zmag);
+	idx=idx+1;
+
+
+	if (_param_sitl_emi_attack_trg.get() != 0)
 	{
-		imu.xgyro += amp_offset;
-		imu.ygyro += amp_offset;
-		imu.zgyro += amp_offset;
-		_sitl_gyro_attack_status.compromised_gyro0 = imu.xgyro;
-		_sitl_gyro_attack_status.compromised_gyro1 = imu.ygyro;
-		_sitl_gyro_attack_status.compromised_gyro2 = imu.zgyro;
+		defense = defense+1;
+		defense_window = idx;
+		_sitl_emi_attack_status.defense_window =defense_window;
+		//off = 1;
+		//gyroscope
+		imu.xgyro = amp_g;
+		amp_g = random_float();
+		imu.ygyro = amp_g;
+		amp_g = random_float();
+		imu.zgyro = amp_g;
+		_sitl_emi_attack_status.compromised_gyro0 = imu.xgyro;
+		_sitl_emi_attack_status.compromised_gyro1 = imu.ygyro;
+		_sitl_emi_attack_status.compromised_gyro2 = imu.zgyro;
+////
+		//////accellerometer
+		imu.xacc = amp_a;
+		amp_a = random_float();
+		imu.yacc = amp_a;
+		amp_a = random_float();
+		imu.zacc = amp_a;
+		_sitl_emi_attack_status.compromised_accel0 = imu.xacc;
+		_sitl_emi_attack_status.compromised_accel1 = imu.yacc;
+		_sitl_emi_attack_status.compromised_accel2 = imu.zacc;
+////
+		//////magnetometor
+		imu.xacc = amp_m;
+		amp_m = random_float();
+		imu.yacc = amp_m;
+		amp_m = random_float();
+		imu.zacc = amp_m;
+		_sitl_emi_attack_status.compromised_mag0 = imu.xmag;
+		_sitl_emi_attack_status.compromised_mag1 = imu.ymag;
+		_sitl_emi_attack_status.compromised_mag2 = imu.zmag;
+		_sitl_emi_attack_status.defense_offset = defense;
+		//look up table here
+		if (defense > 1)
+		{
+
+		_sitl_emi_attack_status.defense_time = defense_window;
+
+		//re_gyro_x = gyro_x.get(defense_window-off);
+		//re_gyro_y = gyro_y.get(defense_window-off);
+		//re_gyro_z = gyro_z.get(defense_window-off);
+		//re_accel_x = accel_x.get(defense_window-off);
+		//re_accel_y = accel_y.get(defense_window-off);
+		//re_accel_z = accel_z.get(defense_window-off);
+		//re_mag_x = mag_x.get(defense_window-off);
+		//re_mag_y = mag_y.get(defense_window-off);
+		//re_mag_z = mag_z.get(defense_window-off);
+		re_gyro_y = gyro_y.get(defense_window-1);
+		re_gyro_z = gyro_z.get(defense_window-1);
+		re_accel_x = accel_x.get(defense_window-1);
+		re_accel_y = accel_y.get(defense_window-1);
+		re_accel_z = accel_z.get(defense_window-1);
+		re_mag_x = mag_x.get(defense_window-1);
+		re_mag_y = mag_y.get(defense_window-1);
+		re_mag_z = mag_z.get(defense_window-1);
+		imu.xgyro=re_gyro_x;
+		imu.ygyro=re_gyro_y;
+		imu.zgyro=re_gyro_z;
+		imu.xacc=re_accel_x;
+		imu.yacc=re_accel_y;
+		imu.zacc=re_accel_z;
+		imu.xmag=re_mag_x;
+		imu.ymag=re_mag_y;
+		imu.zmag=re_mag_z;
+		//off++;
+		}
+		else{
+			defense=defense+1;
+		}
 
 	}
-	else if (_param_sitl_gyro_attack_log.get() != 0)
+	else if (_param_sitl_emi_attack_log.get() != 0)
 	{
-		_sitl_gyro_attack_status.compromised_gyro0 = imu.xgyro+amp_offset;
-		_sitl_gyro_attack_status.compromised_gyro1 = imu.ygyro+amp_offset;
-		_sitl_gyro_attack_status.compromised_gyro2 = imu.zgyro+amp_offset;
+		_sitl_emi_attack_status.compromised_gyro0 = amp_g;
+		_sitl_emi_attack_status.compromised_gyro1 = amp_g;
+		_sitl_emi_attack_status.compromised_gyro2 = amp_g;
+		_sitl_emi_attack_status.compromised_accel0 = amp_a;
+		_sitl_emi_attack_status.compromised_accel1 = amp_a;
+		_sitl_emi_attack_status.compromised_accel2 = amp_a;
+		_sitl_emi_attack_status.compromised_mag0 = amp_m;
+		_sitl_emi_attack_status.compromised_mag1 = amp_m;
+		_sitl_emi_attack_status.compromised_mag2 = amp_m;
+
+		_sitl_emi_attack_status.benign_gyro0 = re_gyro_x;
+		_sitl_emi_attack_status.benign_gyro1 = re_gyro_y;
+		_sitl_emi_attack_status.benign_gyro2 = re_gyro_z;
+		_sitl_emi_attack_status.benign_accel0 = re_accel_x;
+		_sitl_emi_attack_status.benign_accel1 = re_accel_y;
+		_sitl_emi_attack_status.benign_accel2 = re_accel_z;
+		_sitl_emi_attack_status.benign_mag0 = re_mag_x;
+		_sitl_emi_attack_status.benign_mag1 = re_mag_y;
+		_sitl_emi_attack_status.benign_mag2 = re_mag_z;
 
 	}
 	else
 	{
-		_sitl_gyro_attack_status.compromised_gyro0 = imu.xgyro;
-		_sitl_gyro_attack_status.compromised_gyro1 = imu.ygyro;
-		_sitl_gyro_attack_status.compromised_gyro2 = imu.zgyro;
+		_sitl_emi_attack_status.compromised_gyro0 = imu.xgyro;
+		_sitl_emi_attack_status.compromised_gyro1 = imu.ygyro;
+		_sitl_emi_attack_status.compromised_gyro2 = imu.zgyro;
+		_sitl_emi_attack_status.compromised_accel0 = imu.xacc;
+		_sitl_emi_attack_status.compromised_accel1 = imu.yacc;
+		_sitl_emi_attack_status.compromised_accel2 = imu.zacc;
+		_sitl_emi_attack_status.compromised_mag0 = imu.xmag;
+		_sitl_emi_attack_status.compromised_mag1 = imu.ymag;
+		_sitl_emi_attack_status.compromised_mag2 = imu.zmag;
 
 	}
-	_sitl_gyro_attack_status.timestamp       = abs_time;
-       	_sitl_gyro_attack_status.attack_trigger = _param_sitl_gyro_attack_trg.get();
-        _sitl_gyro_attack_status.attack_frequency = (float) _param_sitl_gyro_attack_frq.get();
-       	_sitl_gyro_attack_status.attack_amplitude = (float) _param_sitl_gyro_attack_amp.get();
-        _sitl_gyro_attack_status.attack_log_trigger = _param_sitl_gyro_attack_log.get();
+	_sitl_emi_attack_status.timestamp       = abs_time;
+	_sitl_emi_attack_status.defense_trigger = _param_sitl_emi_defense_trg.get();
+       	_sitl_emi_attack_status.attack_trigger = _param_sitl_emi_attack_trg.get();
+        _sitl_emi_attack_status.attack_frequency_g = (float)  _param_sitl_emi_gyro_frq.get();
+	_sitl_emi_attack_status.attack_frequency_a = (float)  _param_sitl_emi_accel_frq.get();
+        _sitl_emi_attack_status.attack_frequency_m = (float)  _param_sitl_emi_mag_frq.get();
+        _sitl_emi_attack_status.attack_log_trigger = _param_sitl_emi_attack_log.get();
 
-       	_sitl_gyro_attack_status.attack_offset = (float) amp_offset;
-        _sitl_gyro_attack_status.attack_timediff = (float) times_diff;
-	int sitl_gyro_attack_status_multi;
-	orb_publish_auto(ORB_ID(sitl_gyro_attack), &_sitl_gyro_attack_pub, &_sitl_gyro_attack_status,
-				 &sitl_gyro_attack_status_multi, ORB_PRIO_HIGH);
-
-
-        static float amp_offset_a = 0;
-
-	amp_offset_a = _param_sitl_accel_attack_amp.get() * cosf((float) (2.0 * M_PI * times_m * (double) _param_sitl_accel_attack_frq.get()));
-	_sitl_accel_attack_status.benign_accel0 = imu.xacc;
-	_sitl_accel_attack_status.benign_accel1 = imu.yacc;
-	_sitl_accel_attack_status.benign_accel2 = imu.zacc;
-
-	if (_param_sitl_accel_attack_trg.get() != 0)
-	{
-		imu.xacc += amp_offset_a;
-		imu.yacc += amp_offset_a;
-		imu.zacc += amp_offset_a;
-		_sitl_accel_attack_status.compromised_accel0 = imu.xacc;
-		_sitl_accel_attack_status.compromised_accel1 = imu.yacc;
-		_sitl_accel_attack_status.compromised_accel2 = imu.zacc;
-	}
-	else if (_param_sitl_accel_attack_log.get() != 0)
-	{
-		_sitl_accel_attack_status.compromised_accel0 = imu.xacc+amp_offset_a;
-		_sitl_accel_attack_status.compromised_accel1 = imu.yacc+amp_offset_a;
-		_sitl_accel_attack_status.compromised_accel2 = imu.zacc+amp_offset_a;
-
-	}
-	else
-	{
-		_sitl_accel_attack_status.compromised_accel0 = imu.xacc;
-		_sitl_accel_attack_status.compromised_accel1 = imu.yacc;
-		_sitl_accel_attack_status.compromised_accel2 = imu.zacc;
-
-	}
+	//loging amplitude
+       	_sitl_emi_attack_status.attack_amplitude_g = (float) amp_g;
+       	_sitl_emi_attack_status.attack_amplitude_m = (float) amp_m;
+        _sitl_emi_attack_status.attack_timediff = (float) times_diff;
+	int sitl_emi_attack_status_multi;
+	orb_publish_auto(ORB_ID(sitl_emi_attack), &_sitl_emi_attack_pub, &_sitl_emi_attack_status,
+				 &sitl_emi_attack_status_multi, ORB_PRIO_HIGH);
 
 
-	_sitl_accel_attack_status.timestamp       = abs_time;
-       	_sitl_accel_attack_status.attack_trigger = _param_sitl_accel_attack_trg.get();
-        _sitl_accel_attack_status.attack_frequency = (float) _param_sitl_accel_attack_frq.get();
-       	_sitl_accel_attack_status.attack_amplitude = (float) _param_sitl_accel_attack_amp.get();
-        _sitl_accel_attack_status.attack_log_trigger = _param_sitl_accel_attack_log.get();
-
-       	_sitl_accel_attack_status.attack_offset = (float) amp_offset_a;
-        _sitl_accel_attack_status.attack_timediff = (float) times_diff;
-	int sitl_accel_attack_status_multi;
-	orb_publish_auto(ORB_ID(sitl_accel_attack), &_sitl_accel_attack_pub, &_sitl_accel_attack_status,
-		 &sitl_accel_attack_status_multi, ORB_PRIO_HIGH);
 
 
 
@@ -1182,6 +1342,7 @@ int Simulator::publish_odometry_topic(const mavlink_message_t *odom_mavlink)
 
 	return OK;
 }
+
 
 int Simulator::publish_distance_topic(const mavlink_distance_sensor_t *dist_mavlink)
 {

@@ -86,7 +86,19 @@
         "githubPullRequests.telemetry.enabled": false,
         "gitlens.advanced.telemetry.enabled": false,
         "files.associations": {
-                "*.jinja": "jinja"
+                "*.jinja": "jinja",
+                "cctype": "cpp",
+                "cfcntl": "cpp",
+                "cmath": "cpp",
+                "csched": "cpp",
+                "cstdbool": "cpp",
+                "cstddef": "cpp",
+                "cstdint": "cpp",
+                "cstdio": "cpp",
+                "cstdlib": "cpp",
+                "cstring": "cpp",
+                "ctime": "cpp",
+                "cunistd": "cpp"
         },
         "search.exclude": {
                 "build/**": true
@@ -97,5 +109,11 @@
         "workbench.editor.highlightModifiedTabs": true,
         "workbench.enableExperiments": false,
         "workbench.settings.enableNaturalLanguageSearch": false,
-        "workbench.statusBar.feedback.visible": false
+        "workbench.statusBar.feedback.visible": false,
+        "[cpp]": {
+                "editor.defaultFormatter": "ms-vscode.cpptools"
+        },
+        "[python]": {
+                "editor.defaultFormatter": "ms-python.python"
+        }
 }

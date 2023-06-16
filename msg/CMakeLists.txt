@@ -107,6 +107,7 @@ set(msg_files
         hitl_gyro_attack.msg
 	sensor_gyro_attack.msg
 	sitl_accel_attack.msg
+	sitl_emi_attack.msg
 	hitl_accel_attack.msg
 	dnn_recv.msg
 	dnn_send.msg

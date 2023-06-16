@@ -69,6 +69,7 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/sitl_gyro_attack.h>
 #include <uORB/topics/sitl_accel_attack.h>
+#include <uORB/topics/sitl_emi_attack.h>
 #include <uORB/topics/dnn_send.h>
 #include <uORB/uORB.h>
 
@@ -160,6 +161,7 @@ class Simulator : public ModuleParams
 {
 public:
 	static Simulator *getInstance();
+
 
 	enum class InternetProtocol {
 		TCP,
@@ -285,6 +287,8 @@ private:
 	orb_advert_t _rc_channels_pub{nullptr};
 	orb_advert_t _sitl_gyro_attack_pub{nullptr};
 	orb_advert_t _sitl_accel_attack_pub{nullptr};
+	orb_advert_t _sitl_emi_attack_pub{nullptr};
+
 
 	// uORB subscription handlers
 	int _actuator_outputs_sub{-1};
@@ -307,6 +311,7 @@ private:
 	vehicle_status_s _vehicle_status {};
 	sitl_gyro_attack_s _sitl_gyro_attack_status {};
 	sitl_accel_attack_s _sitl_accel_attack_status {};
+	sitl_emi_attack_s _sitl_emi_attack_status {};
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::SIM_BAT_DRAIN>) _param_sim_bat_drain, ///< battery drain interval
@@ -314,11 +319,21 @@ private:
 		(ParamInt<px4::params::MAV_TYPE>) _param_mav_type,
 		(ParamInt<px4::params::MAV_SYS_ID>) _param_mav_sys_id,
 		(ParamInt<px4::params::MAV_COMP_ID>) _param_mav_comp_id,
-		(ParamInt<px4::params::SITL_GYRO_TRG>) _param_sitl_gyro_attack_trg, 
+		(ParamInt<px4::params::SITL_EMI_TRG>) _param_sitl_emi_attack_trg,
+		(ParamInt<px4::params::SITL_DEF_TRG>) _param_sitl_emi_defense_trg,
+		(ParamFloat<px4::params::SITL_GYR_FREQ>) _param_sitl_emi_gyro_frq,
+		(ParamFloat<px4::params::SITL_ACC_FREQ>) _param_sitl_emi_accel_frq,
+		(ParamFloat<px4::params::SITL_MAG_FREQ>) _param_sitl_emi_mag_frq,
+		(ParamFloat<px4::params::SITL_GYR_AMP>) _param_sitl_emi_gyro_amp,
+		(ParamFloat<px4::params::SITL_ACC_AMP>) _param_sitl_emi_accel_amp,
+		(ParamFloat<px4::params::SITL_MAG_AMP>) _param_sitl_emi_mag_amp,
+		(ParamInt<px4::params::SITL_EMI_LOG>) _param_sitl_emi_attack_log,
+		(ParamInt<px4::params::SITL_GYRO_TRG>) _param_sitl_gyro_attack_trg,
+
 		(ParamFloat<px4::params::SITL_GYRO_FREQ>) _param_sitl_gyro_attack_frq,
 		(ParamFloat<px4::params::SITL_GYRO_AMP>) _param_sitl_gyro_attack_amp,
 		(ParamInt<px4::params::SITL_GYRO_LOG>) _param_sitl_gyro_attack_log,
-		(ParamInt<px4::params::SITL_ACCEL_TRG>) _param_sitl_accel_attack_trg, 
+		(ParamInt<px4::params::SITL_ACCEL_TRG>) _param_sitl_accel_attack_trg,
 		(ParamFloat<px4::params::SITL_ACCEL_FREQ>) _param_sitl_accel_attack_frq,
 		(ParamFloat<px4::params::SITL_ACCEL_AMP>) _param_sitl_accel_attack_amp,
 		(ParamInt<px4::params::SITL_ACCEL_LOG>) _param_sitl_accel_attack_log

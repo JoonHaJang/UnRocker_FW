@@ -273,6 +273,8 @@ MavlinkMissionManager::send_mission_current(uint16_t seq)
 		mavlink_msg_mission_current_send_struct(_mavlink->get_channel(), &wpc);
 
 	} else if (seq == 0 && item_count == 0) {
+	} else if (seq <= 0 && item_count == 0) {
+
 		/* don't broadcast if no WPs */
 
 	} else {

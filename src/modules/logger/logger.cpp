@@ -556,8 +556,9 @@ void Logger::add_default_topics()
 	add_topic("sensor_accel_attack");//jsjeong
         add_topic("sitl_gyro_attack");//jsjeong
 	add_topic("sitl_accel_attack");//jsjeong
+	add_topic("sitl_emi_attack");//jsjeong
         add_topic("hitl_gyro_attack");//jsjeong
-	add_topic("hitl_accel_attack");//jsjeong
+  	add_topic("hitl_accel_attack");//jsjeong
 	add_topic("dnn_send");//jsjeong
 	add_topic("dnn_recv");//jsjeong
 	add_topic("sensor_true");//jsjeong
